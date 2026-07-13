@@ -392,6 +392,12 @@
             </div>
           </div>
 
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Observação <span class="normal-case text-[var(--muted-2)] font-normal">(opcional)</span></label>
+            <textarea id="formObservacao" rows="2" placeholder="Ex: Levou equipamento, aguardou no local, etc."
+              class="w-full rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+          </div>
+
           <div class="pt-2 flex gap-2">
             <button type="submit" id="btnSalvar" class="btn-primary flex-1 py-2.5 rounded-lg text-sm transition-all cursor-pointer">
               <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar registro
@@ -681,6 +687,7 @@
             <td class="px-4 py-3">
               <div class="text-xs"><span class="text-[var(--muted-2)] font-semibold">DE:</span> ${v.origem}</div>
               <div class="text-xs"><span class="text-[var(--muted-2)] font-semibold">PARA:</span> ${v.destino}</div>
+              ${v.observacao ? `<div class="text-[11px] text-[var(--muted)] italic mt-1"><i class="fa-solid fa-note-sticky mr-1"></i>${v.observacao}</div>` : ''}
             </td>
             <td class="px-4 py-3 text-right whitespace-nowrap text-xs mono">
               <span class="text-[var(--muted)]">${formatarNumero(v.kmInicial)}</span> → <span class="text-[var(--ink)]">${formatarNumero(v.kmFinal)}</span>
@@ -768,6 +775,7 @@
     document.getElementById('formKmInicial').value = v.kmInicial;
     document.getElementById('formDestino').value = v.destino;
     document.getElementById('formKmFinal').value = v.kmFinal;
+    document.getElementById('formObservacao').value = v.observacao || "";
 
     document.getElementById('tituloFormulario').textContent = "Editar viagem selecionada";
     document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-pen-to-square mr-1"></i> Atualizar registro';
@@ -803,7 +811,8 @@
       origem: document.getElementById('formOrigem').value.trim(),
       destino: document.getElementById('formDestino').value.trim(),
       kmInicial: Number(document.getElementById('formKmInicial').value),
-      kmFinal: Number(document.getElementById('formKmFinal').value)
+      kmFinal: Number(document.getElementById('formKmFinal').value),
+      observacao: document.getElementById('formObservacao').value.trim()
     };
 
     if (payload.kmFinal < payload.kmInicial) {
