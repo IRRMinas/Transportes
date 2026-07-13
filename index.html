@@ -2,520 +2,786 @@
 <html lang="pt-BR">
 
 <head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Controle de Motoristas - Fiocruz Minas</title>
-  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
-  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Controle de Frota — Fiocruz Minas</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=IBM+Plex+Mono:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+<script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+
+<style>
+  :root{
+    --bg:#0d1424;
+    --bg-deep:#090e1a;
+    --surface:#141d38;
+    --surface-2:#1b2748;
+    --border:#2a3860;
+    --border-soft:#212e54;
+    --ink:#eef1fb;
+    --muted:#8f9bc2;
+    --muted-2:#6a76a0;
+    --amber:#f2a93b;
+    --amber-ink:#3a2a0d;
+    --teal:#45c1a8;
+    --red:#e8564f;
+    --blue:#5b8def;
+    --radius:16px;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 600px at 8% -10%, rgba(242,169,59,.08), transparent 60%),
+      radial-gradient(1000px 700px at 100% 0%, rgba(69,193,168,.07), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4,.font-display{font-family:'Fraunces', serif;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+
+  ::selection{background:var(--amber);color:var(--amber-ink);}
+
+  a{color:inherit;}
+
+  .panel{
+    background:linear-gradient(180deg, var(--surface), var(--bg-deep) 180%);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius);
+  }
+
+  /* ---------- Topbar ---------- */
+  .topbar{
+    background:linear-gradient(180deg, #101a34, #0c1428);
+    border-bottom:1px solid var(--border-soft);
+    position:sticky; top:0; z-index:50;
+  }
+  .topbar-accent{
+    height:3px;
+    background:linear-gradient(90deg, var(--amber), var(--teal) 55%, var(--blue));
+    opacity:.85;
+  }
+
+  .mark{
+    width:44px;height:44px;border-radius:12px;
+    background:radial-gradient(circle at 30% 20%, #1c2a52, #0c1428 75%);
+    border:1px solid var(--border-soft);
+    display:flex;align-items:center;justify-content:center;
+  }
+
+  /* ---------- Alert sign ---------- */
+  .alert-sign{
+    background:repeating-linear-gradient(135deg, rgba(232,86,79,.15) 0 12px, rgba(232,86,79,.05) 12px 24px), #1c1424;
+    border:1px solid rgba(232,86,79,.4);
+    border-radius:12px;
+  }
+  @keyframes blinker{ 50%{opacity:.35;} }
+  .alert-dot{animation:blinker 1.4s ease-in-out infinite;}
+
+  /* ---------- Odometer cluster ---------- */
+  .cluster{
+    background:
+      linear-gradient(180deg, #172a52, transparent),
+      linear-gradient(180deg, #16204a, #0d1530);
+    border:1px solid var(--border-soft);
+    border-radius:20px;
+    position:relative;
+    overflow:hidden;
+  }
+  .cluster::before{
+    content:"";
+    position:absolute; inset:0;
+    background:linear-gradient(180deg, rgba(255,255,255,.04), transparent 30%);
+    pointer-events:none;
+  }
+  .cluster-cell{
+    border-right:1px dashed var(--border-soft);
+  }
+  .cluster-cell:last-child{border-right:none;}
+  .display{
+    background:#060a16;
+    border:1px solid #1c2748;
+    border-radius:10px;
+    box-shadow:inset 0 2px 10px rgba(0,0,0,.6);
+    padding:.65rem .85rem;
+  }
+  .display .digits{
+    font-family:'IBM Plex Mono', monospace;
+    font-weight:700;
+    letter-spacing:.06em;
+    color:var(--amber);
+    text-shadow:0 0 14px rgba(242,169,59,.45);
+  }
+  .display.teal .digits{color:var(--teal); text-shadow:0 0 14px rgba(69,193,168,.4);}
+
+  /* ---------- Gauge bar (fleet status) ---------- */
+  .gauge-track{
+    height:8px;border-radius:99px;
+    background:#0d1530;
+    border:1px solid var(--border-soft);
+    overflow:hidden;
+  }
+  .gauge-fill{
+    height:100%;border-radius:99px;
+    transition:width .8s cubic-bezier(.2,.8,.2,1);
+  }
+
+  .chip{
+    display:inline-flex;align-items:center;gap:.35rem;
+    background:var(--surface-2);
+    border:1px solid var(--border-soft);
+    color:var(--muted);
+    font-size:.7rem;font-weight:600;
+    padding:.2rem .55rem;border-radius:999px;
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+
+  input, select{
+    background:var(--surface-2);
+    border:1px solid var(--border-soft);
+    color:var(--ink);
+  }
+  input::placeholder{color:var(--muted-2);}
+  input:focus, select:focus{
+    outline:none;
+    border-color:var(--amber);
+    box-shadow:0 0 0 3px rgba(242,169,59,.15);
+  }
+
+  .btn-primary{
+    background:linear-gradient(180deg, #f6bb5c, var(--amber));
+    color:#241a06;
+    font-weight:700;
+    box-shadow:0 8px 20px -8px rgba(242,169,59,.6);
+  }
+  .btn-primary:hover{filter:brightness(1.06);}
+  .btn-primary:active{filter:brightness(.96);}
+
+  .btn-ghost{
+    background:var(--surface-2);
+    border:1px solid var(--border-soft);
+    color:var(--muted);
+  }
+  .btn-ghost:hover{color:var(--ink); border-color:var(--amber);}
+
+  table thead th{
+    font-family:'IBM Plex Mono', monospace;
+    letter-spacing:.06em;
+  }
+  tbody tr{border-bottom:1px solid var(--border-soft);}
+  tbody tr:hover{background:rgba(255,255,255,.02);}
+
+  .scrollbar-thin::-webkit-scrollbar{height:6px;width:6px;}
+  .scrollbar-thin::-webkit-scrollbar-thumb{background:var(--border-soft);border-radius:99px;}
+
+  /* ---------- Toasts ---------- */
+  #toastWrap{position:fixed; right:1rem; bottom:1rem; z-index:100; display:flex; flex-direction:column; gap:.6rem; width:min(360px, calc(100vw - 2rem));}
+  .toast{
+    display:flex; align-items:flex-start; gap:.6rem;
+    background:var(--surface); border:1px solid var(--border-soft);
+    border-left:3px solid var(--blue);
+    border-radius:10px; padding:.75rem .9rem;
+    box-shadow:0 14px 34px -14px rgba(0,0,0,.6);
+    animation:toastIn .25s ease-out;
+    font-size:.85rem;
+  }
+  .toast.success{border-left-color:var(--teal);}
+  .toast.error{border-left-color:var(--red);}
+  @keyframes toastIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+
+  @keyframes riseIn{from{opacity:0; transform:translateY(6px);} to{opacity:1; transform:translateY(0);}}
+  .rise{animation:riseIn .5s ease-out both;}
+
+  @media (prefers-reduced-motion: reduce){
+    .alert-dot{animation:none;}
+    .rise{animation:none;}
+  }
+
+  .skeleton{
+    background:linear-gradient(90deg, var(--surface-2) 25%, #24305a 37%, var(--surface-2) 63%);
+    background-size:400% 100%;
+    animation:shimmer 1.4s ease infinite;
+    border-radius:8px;
+  }
+  @keyframes shimmer{0%{background-position:100% 0;}100%{background-position:0 0;}}
+</style>
 </head>
 
-<body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
+<body>
 
-  <script>
-    const API_URL = "https://script.google.com/macros/s/AKfycbzsV7Yh-YVLdQR4gA4xeJaYH9kHJ5-l2Wsn2VjUcvFgsh7H_qhQlNjx4c9OWSUldxG3/exec";
-  </script>
+  <div id="toastWrap"></div>
 
-  <header class="bg-slate-800 border-b border-slate-700 shadow-xl sticky top-0 z-50">
+  <!-- ================= TOPBAR ================= -->
+  <header class="topbar">
     <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
       <div class="flex items-center gap-3">
-        <div class="bg-teal-500 p-2.5 rounded-xl shadow-lg shadow-teal-500/20">
-          <i class="fa-solid fa-truck-steering text-xl text-slate-900"></i>
+        <div class="mark">
+          <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <path d="M3 16.5 L7 8.5 L17 8.5 L21 16.5" stroke="#f2a93b" stroke-width="1.6" stroke-linejoin="round"/>
+            <circle cx="7.5" cy="17.5" r="1.9" stroke="#eef1fb" stroke-width="1.4"/>
+            <circle cx="16.5" cy="17.5" r="1.9" stroke="#eef1fb" stroke-width="1.4"/>
+            <path d="M9.3 17.5 H14.7" stroke="#eef1fb" stroke-width="1.4"/>
+            <path d="M9.5 8.5 V5.4 H13.2" stroke="#45c1a8" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
         </div>
         <div>
-          <h1 class="text-xl font-bold tracking-tight text-white">Controle de Frota & Motoristas</h1>
-          <p class="text-xs text-slate-400 font-medium">Prestação de Contas — Fiocruz Minas</p>
+          <h1 class="text-lg sm:text-xl font-bold tracking-tight text-white font-display">Controle de Frota</h1>
+          <p class="text-[11px] sm:text-xs text-[var(--muted)] font-medium mono uppercase tracking-wider">Fiocruz Minas · Prestação de Contas — Setor de Transportes</p>
         </div>
       </div>
 
       <div class="flex items-center gap-2 w-full sm:w-auto">
-        <label for="filtroMotorista" class="text-sm font-semibold text-slate-400 whitespace-nowrap"><i
-            class="fa-solid fa-filter mr-1"></i> Filtrar por:</label>
         <select id="filtroMotorista" onchange="renderizarDashboard()"
-          class="w-full sm:w-48 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white font-medium focus:outline-none focus:border-teal-500 transition-colors cursor-pointer">
-          <option value="GERAL">Todos os Motoristas</option>
+          class="w-full sm:w-52 rounded-lg px-3 py-2 text-sm font-medium cursor-pointer">
+          <option value="GERAL">Todos os motoristas</option>
         </select>
         <button onclick="carregarDados()"
-          class="bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300 p-2 rounded-lg text-sm transition-colors cursor-pointer"
+          class="btn-ghost p-2.5 rounded-lg text-sm transition-colors cursor-pointer shrink-0"
           title="Atualizar dados">
           <i id="btnRecarregarIcon" class="fa-solid fa-arrow-rotate-right"></i>
         </button>
       </div>
     </div>
+    <div class="topbar-accent"></div>
   </header>
 
   <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
 
-    <div id="containerAlertas" class="hidden grid grid-cols-1 gap-4">
+    <!-- ================= ERRO DE CONEXÃO ================= -->
+    <div id="bannerErro" class="hidden alert-sign rounded-2xl p-4 flex items-start gap-3">
+      <div class="text-[var(--red)] text-xl mt-0.5"><i class="fa-solid fa-plug-circle-xmark"></i></div>
+      <div class="flex-1">
+        <h5 class="font-bold text-white text-sm mb-1">Não foi possível carregar os dados da planilha</h5>
+        <p id="bannerErroTexto" class="text-xs text-[var(--muted)] leading-relaxed">Verifique se o Apps Script está publicado como aplicativo da web com acesso "Qualquer pessoa" e se a URL em API_URL está correta.</p>
+      </div>
+      <button onclick="carregarDados()" class="btn-ghost px-3 py-1.5 rounded-lg text-xs shrink-0">Tentar de novo</button>
     </div>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg relative overflow-hidden group">
-        <div
-          class="absolute -right-4 -bottom-4 text-slate-700/20 text-7xl group-hover:scale-110 transition-transform duration-300">
-          <i class="fa-solid fa-calendar-week"></i></div>
-        <p class="text-sm font-semibold text-slate-400 mb-1">KM Rodados na Semana</p>
-        <h3 id="kpiSemana" class="text-3xl font-extrabold text-white">0 <span
-            class="text-sm font-normal text-slate-400">km</span></h3>
+    <!-- ================= ALERTAS DE MANUTENÇÃO ================= -->
+    <div id="containerAlertas" class="hidden grid grid-cols-1 gap-3"></div>
+
+    <!-- ================= CLUSTER (ODÔMETRO) ================= -->
+    <div class="cluster p-5 sm:p-6">
+      <div class="flex items-center justify-between mb-4">
+        <h4 class="text-xs uppercase tracking-[.15em] text-[var(--muted)] font-semibold mono">Painel de bordo</h4>
+        <span id="statusSync" class="text-[11px] text-[var(--muted-2)] mono">—</span>
       </div>
-      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg relative overflow-hidden group">
-        <div
-          class="absolute -right-4 -bottom-4 text-slate-700/20 text-7xl group-hover:scale-110 transition-transform duration-300">
-          <i class="fa-solid fa-calendar-days"></i></div>
-        <p class="text-sm font-semibold text-slate-400 mb-1">KM Rodados no Mês</p>
-        <h3 id="kpiMes" class="text-3xl font-extrabold text-teal-400">0 <span
-            class="text-sm font-normal text-slate-400">km</span></h3>
-      </div>
-      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg relative overflow-hidden group">
-        <div
-          class="absolute -right-4 -bottom-4 text-slate-700/20 text-7xl group-hover:scale-110 transition-transform duration-300">
-          <i class="fa-solid fa-calendar"></i></div>
-        <p class="text-sm font-semibold text-slate-400 mb-1">KM Rodados no Ano</p>
-        <h3 id="kpiAno" class="text-3xl font-extrabold text-white">0 <span
-            class="text-sm font-normal text-slate-400">km</span></h3>
-      </div>
-      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg relative overflow-hidden group">
-        <div
-          class="absolute -right-4 -bottom-4 text-slate-700/20 text-7xl group-hover:scale-110 transition-transform duration-300">
-          <i class="fa-solid fa-id-card"></i></div>
-        <p class="text-sm font-semibold text-slate-400 mb-1">Líder de Rodagem (Mês)</p>
-        <h3 id="kpiLider" class="text-xl font-bold text-teal-400 mt-1 truncate">-</h3>
+      <div class="grid grid-cols-2 lg:grid-cols-4">
+        <div class="cluster-cell px-2 sm:px-5 py-2">
+          <p class="text-[11px] uppercase tracking-wider text-[var(--muted)] mb-2">Semana</p>
+          <div class="display"><span id="kpiSemana" class="digits text-2xl sm:text-3xl">000000</span><span class="text-xs text-[var(--muted)] ml-1">km</span></div>
+        </div>
+        <div class="cluster-cell px-2 sm:px-5 py-2">
+          <p class="text-[11px] uppercase tracking-wider text-[var(--muted)] mb-2">Mês</p>
+          <div class="display teal"><span id="kpiMes" class="digits text-2xl sm:text-3xl">000000</span><span class="text-xs text-[var(--muted)] ml-1">km</span></div>
+        </div>
+        <div class="cluster-cell px-2 sm:px-5 py-2">
+          <p class="text-[11px] uppercase tracking-wider text-[var(--muted)] mb-2">Ano</p>
+          <div class="display"><span id="kpiAno" class="digits text-2xl sm:text-3xl">000000</span><span class="text-xs text-[var(--muted)] ml-1">km</span></div>
+        </div>
+        <div class="px-2 sm:px-5 py-2">
+          <p class="text-[11px] uppercase tracking-wider text-[var(--muted)] mb-2">Líder de rodagem</p>
+          <h3 id="kpiLider" class="text-base sm:text-lg font-bold text-white font-display mt-1 truncate">—</h3>
+        </div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
-      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg lg:col-span-2">
-        <h4 class="text-base font-bold text-white mb-4"><i
-            class="fa-solid fa-chart-line text-teal-500 mr-2"></i>Evolução de Km Rodados por Dia</h4>
+    <!-- ================= GRÁFICOS ================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div class="panel p-5 lg:col-span-2">
+        <h4 class="text-base font-bold text-white mb-4 font-display"><i class="fa-solid fa-chart-line text-[var(--amber)] mr-2"></i>Evolução de km rodados por dia</h4>
         <div id="chartEvolucao"></div>
       </div>
-      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg">
-        <h4 class="text-base font-bold text-white mb-4"><i
-            class="fa-solid fa-map-location-dot text-teal-500 mr-2"></i>Destinos Mais Visitados</h4>
+      <div class="panel p-5">
+        <h4 class="text-base font-bold text-white mb-4 font-display"><i class="fa-solid fa-map-location-dot text-[var(--amber)] mr-2"></i>Destinos mais visitados</h4>
         <div id="chartDestinos"></div>
       </div>
     </div>
 
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+    <!-- ================= STATUS DA FROTA (GAUGES) ================= -->
+    <div class="panel p-5">
+      <h4 class="text-base font-bold text-white mb-4 font-display"><i class="fa-solid fa-gauge-high text-[var(--amber)] mr-2"></i>Status da frota — km até a manutenção</h4>
+      <div id="frotaStatusWrap" class="flex gap-3 overflow-x-auto scrollbar-thin pb-2">
+        <div class="skeleton h-24 w-64 shrink-0"></div>
+        <div class="skeleton h-24 w-64 shrink-0"></div>
+        <div class="skeleton h-24 w-64 shrink-0"></div>
+      </div>
+    </div>
 
-      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg sticky top-24">
-        <div class="flex items-center gap-2 mb-4 border-b border-slate-700 pb-3">
-          <i class="fa-solid fa-pen-to-square text-teal-500 text-lg"></i>
-          <h4 id="tituloFormulario" class="text-base font-bold text-white">Registrar Nova Viagem</h4>
+    <!-- ================= FORMULÁRIO + TABELA ================= -->
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+
+      <div class="panel p-5 sticky top-24">
+        <div class="flex items-center gap-2 mb-4 border-b border-[var(--border-soft)] pb-3">
+          <i class="fa-solid fa-pen-to-square text-[var(--amber)] text-lg"></i>
+          <h4 id="tituloFormulario" class="text-base font-bold text-white font-display">Registrar nova viagem</h4>
         </div>
 
         <form id="formViagem" onsubmit="salvarDadosFormulario(event)" class="space-y-4">
           <input type="hidden" id="formId">
 
           <div>
-            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Data da
-              Viagem</label>
-            <input type="date" id="formData" required
-              class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-500">
+            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Data da viagem</label>
+            <input type="date" id="formData" required class="w-full rounded-lg px-3 py-2 text-sm">
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Motorista</label>
-              <input type="text" id="formMotorista" required placeholder="Ex: MAGNO"
-                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 uppercase">
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Motorista</label>
+              <input type="text" id="formMotorista" required placeholder="Ex: MAGNO" class="w-full rounded-lg px-3 py-2 text-sm uppercase">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Veículo</label>
-              <input type="text" id="formVeiculo" required placeholder="Ex: PICAPE"
-                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 uppercase">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Local
-                Origem</label>
-              <input type="text" id="formOrigem" required placeholder="Ex: Sede"
-                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
-            </div>
-            <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Local
-                Destino</label>
-              <input type="text" id="formDestino" required placeholder="Ex: Fiocruz"
-                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Veículo</label>
+              <input type="text" id="formVeiculo" required placeholder="Ex: PICAPE" class="w-full rounded-lg px-3 py-2 text-sm uppercase">
             </div>
           </div>
 
           <div class="grid grid-cols-2 gap-3">
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">KM Inicial
-                (Saída)</label>
-              <input type="number" id="formKmInicial" required placeholder="0"
-                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Origem</label>
+              <input type="text" id="formOrigem" required placeholder="Ex: Sede" class="w-full rounded-lg px-3 py-2 text-sm">
             </div>
             <div>
-              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">KM Final
-                (Chegada)</label>
-              <input type="number" id="formKmFinal" required placeholder="0"
-                class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Destino</label>
+              <input type="text" id="formDestino" required placeholder="Ex: Fiocruz" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Km inicial</label>
+              <input type="number" id="formKmInicial" required placeholder="0" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Km final</label>
+              <input type="number" id="formKmFinal" required placeholder="0" class="w-full rounded-lg px-3 py-2 text-sm">
             </div>
           </div>
 
           <div class="pt-2 flex gap-2">
-            <button type="submit" id="btnSalvar"
-              class="flex-1 bg-teal-500 hover:bg-teal-400 active:bg-teal-600 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition-colors shadow-lg shadow-teal-500/10 cursor-pointer">
-              <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Registro
+            <button type="submit" id="btnSalvar" class="btn-primary flex-1 py-2.5 rounded-lg text-sm transition-all cursor-pointer">
+              <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar registro
             </button>
-            <button type="button" id="btnCancelarEdicao" onclick="limparFormulario()"
-              class="hidden bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2.5 rounded-lg text-sm transition-colors cursor-pointer">
+            <button type="button" id="btnCancelarEdicao" onclick="limparFormulario()" class="hidden btn-ghost px-3 py-2.5 rounded-lg text-sm cursor-pointer">
               Cancelar
             </button>
           </div>
         </form>
       </div>
 
-      <div class="bg-slate-800 rounded-2xl border border-slate-700/60 shadow-lg lg:col-span-2 overflow-hidden">
-        <div class="p-5 border-b border-slate-700 bg-slate-800/50 flex justify-between items-center">
-          <h4 class="text-base font-bold text-white"><i class="fa-solid fa-list-check text-teal-500 mr-2"></i>Histórico
-            Completo de Viagens</h4>
-          <span id="contadorRegistros"
-            class="text-xs bg-slate-700 border border-slate-600 text-slate-300 px-2.5 py-1 rounded-full font-semibold">0
-            registros</span>
+      <div class="panel lg:col-span-2 overflow-hidden">
+        <div class="p-5 border-b border-[var(--border-soft)] flex justify-between items-center">
+          <h4 class="text-base font-bold text-white font-display"><i class="fa-solid fa-list-check text-[var(--amber)] mr-2"></i>Histórico completo</h4>
+          <span id="contadorRegistros" class="chip">0 registros</span>
         </div>
 
-        <div class="overflow-x-auto">
+        <div class="overflow-x-auto scrollbar-thin">
           <table class="w-full border-collapse text-left text-sm">
             <thead>
-              <tr
-                class="border-b border-slate-700 bg-slate-900/40 text-slate-400 font-semibold uppercase text-xs tracking-wider">
+              <tr class="border-b border-[var(--border-soft)] bg-black/10 text-[var(--muted)] font-semibold uppercase text-[11px]">
                 <th class="px-4 py-3">Data</th>
                 <th class="px-4 py-3">Motorista / Carro</th>
                 <th class="px-4 py-3">Trajeto</th>
-                <th class="px-4 py-3 text-right">KMs Odômetro</th>
+                <th class="px-4 py-3 text-right">Odômetro</th>
                 <th class="px-4 py-3 text-right">Total</th>
                 <th class="px-4 py-3 text-center">Ações</th>
               </tr>
             </thead>
-            <tbody id="tabelaViagensBody" class="divide-y divide-slate-700/50 text-slate-300">
-              <tr>
-                <td colspan="6" class="px-4 py-8 text-center text-slate-500 font-medium">
-                  <i class="fa-solid fa-spinner fa-spin mr-2 text-teal-500 text-base"></i> Carregando registros do
-                  Google Sheets...
-                </td>
-              </tr>
+            <tbody id="tabelaViagensBody" class="text-[var(--ink)]/90">
+              <tr><td colspan="6" class="px-4 py-10 text-center text-[var(--muted)] font-medium">
+                <i class="fa-solid fa-spinner fa-spin mr-2 text-[var(--amber)]"></i> Carregando registros do Google Sheets...
+              </td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
     </div>
+
+    <p class="text-center text-[11px] text-[var(--muted-2)] mono pb-4">Fiocruz Minas · Dados armazenados em planilha Google Sheets via Apps Script</p>
   </main>
 
-  <script>
-    let dadosGlobais = { statusMotoristas: [], viagens: [] };
-    let chartEvolucaoObj = null;
-    let chartDestinosObj = null;
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbzsV7Yh-YVLdQR4gA4xeJaYH9kHJ5-l2Wsn2VjUcvFgsh7H_qhQlNjx4c9OWSUldxG3/exec";
 
-    // Inicialização ao carregar a página
-    document.addEventListener("DOMContentLoaded", () => {
-      // Seta data de hoje por padrão no formulário
-      document.getElementById('formData').valueAsDate = new Date();
-      carregarDados();
+  let dadosGlobais = { statusMotoristas: [], viagens: [] };
+  let chartEvolucaoObj = null;
+  let chartDestinosObj = null;
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('formData').valueAsDate = new Date();
+    carregarDados();
+  });
+
+  // ---------- Toasts ----------
+  function showToast(msg, type = "info", ms = 4200) {
+    const wrap = document.getElementById('toastWrap');
+    const icons = { success: 'fa-circle-check', error: 'fa-triangle-exclamation', info: 'fa-circle-info' };
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} mt-0.5"></i><span>${msg}</span>`;
+    wrap.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, ms);
+  }
+
+  function formatarNumero(n) {
+    return Math.round(n).toLocaleString('pt-BR');
+  }
+
+  // Anima a contagem de um display tipo odômetro
+  function animarDigitos(elId, valorFinal) {
+    const el = document.getElementById(elId);
+    const inicio = 0;
+    const duracao = 700;
+    const t0 = performance.now();
+    function passo(t) {
+      const p = Math.min(1, (t - t0) / duracao);
+      const ease = 1 - Math.pow(1 - p, 3);
+      el.textContent = formatarNumero(inicio + (valorFinal - inicio) * ease);
+      if (p < 1) requestAnimationFrame(passo);
+      else el.textContent = formatarNumero(valorFinal);
+    }
+    requestAnimationFrame(passo);
+  }
+
+  // ---------- Carregamento ----------
+  async function carregarDados() {
+    const btnIcon = document.getElementById('btnRecarregarIcon');
+    btnIcon.classList.add('fa-spin');
+    document.getElementById('bannerErro').classList.add('hidden');
+
+    try {
+      const urlComCacheBuster = API_URL + "?_nocache=" + new Date().getTime();
+      const response = await fetch(urlComCacheBuster, { method: 'GET', redirect: 'follow' });
+
+      if (!response.ok) throw new Error("HTTP " + response.status);
+
+      const resJson = await response.json();
+
+      if (resJson.sucesso) {
+        dadosGlobais = resJson;
+        atualizarDropdownMotoristas();
+        renderizarDashboard();
+        document.getElementById('statusSync').textContent =
+          "Atualizado às " + new Date().toLocaleTimeString('pt-BR');
+      } else {
+        mostrarErroCarregamento(resJson.erro || "A planilha retornou um erro desconhecido.");
+      }
+    } catch (err) {
+      console.error(err);
+      mostrarErroCarregamento("Falha de conexão com o Apps Script. Isso costuma acontecer quando a implantação não está publicada com acesso \"Qualquer pessoa\", ou a URL mudou após um novo deploy.");
+    } finally {
+      btnIcon.classList.remove('fa-spin');
+    }
+  }
+
+  function mostrarErroCarregamento(msg) {
+    document.getElementById('bannerErroTexto').textContent = msg;
+    document.getElementById('bannerErro').classList.remove('hidden');
+    showToast("Não foi possível carregar os dados.", "error");
+  }
+
+  function atualizarDropdownMotoristas() {
+    const select = document.getElementById('filtroMotorista');
+    const valorAtual = select.value;
+    select.innerHTML = '<option value="GERAL">Todos os motoristas</option>';
+    dadosGlobais.statusMotoristas.forEach(m => {
+      const opt = document.createElement('option');
+      opt.value = m.motorista;
+      opt.textContent = m.motorista;
+      select.appendChild(opt);
+    });
+    select.value = valorAtual;
+  }
+
+  function destinoTop(lugaresVisitados) {
+    if (!lugaresVisitados) return null;
+    const entradas = Object.entries(lugaresVisitados);
+    if (!entradas.length) return null;
+    entradas.sort((a, b) => b[1] - a[1]);
+    return entradas[0][0];
+  }
+
+  function renderizarDashboard() {
+    const motoristaSelecionado = document.getElementById('filtroMotorista').value;
+
+    const viagensFiltradas = motoristaSelecionado === "GERAL"
+      ? dadosGlobais.viagens
+      : dadosGlobais.viagens.filter(v => v.motorista === motoristaSelecionado);
+
+    // 1. ALERTAS
+    const containerAlertas = document.getElementById('containerAlertas');
+    containerAlertas.innerHTML = "";
+    let temAlertaAtivo = false;
+
+    dadosGlobais.statusMotoristas.forEach(m => {
+      if (motoristaSelecionado === "GERAL" || m.motorista === motoristaSelecionado) {
+        if (m.atingiuAlerta) {
+          temAlertaAtivo = true;
+          const excesso = Math.abs(m.diferencaAlerta);
+          containerAlertas.innerHTML += `
+            <div class="alert-sign rounded-2xl p-4 flex items-center justify-between gap-3 rise">
+              <div class="flex items-center gap-3">
+                <div class="alert-dot bg-[var(--red)] text-[#1c0a08] w-9 h-9 rounded-xl flex items-center justify-center shrink-0">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                  <h5 class="font-bold text-white text-sm">Manutenção necessária — ${m.motorista} (${m.veiculo})</h5>
+                  <p class="text-xs text-[var(--muted)]">Veículo alcançou ${formatarNumero(m.ultimoKm)} km, acima do limite de ${formatarNumero(m.kmAlerta)} km.</p>
+                </div>
+              </div>
+              <span class="bg-[var(--red)] text-[#1c0a08] font-black px-3 py-1 rounded-lg text-xs mono shrink-0">+${formatarNumero(excesso)} KM</span>
+            </div>
+          `;
+        }
+      }
+    });
+    containerAlertas.classList.toggle('hidden', !temAlertaAtivo);
+
+    // 2. CLUSTER (KPIs)
+    let totalSemana = 0, totalMes = 0, totalAno = 0;
+    let maiorKmRodadoMes = -1;
+    let liderMes = "Nenhum registro ainda";
+
+    if (motoristaSelecionado === "GERAL") {
+      dadosGlobais.statusMotoristas.forEach(m => {
+        totalSemana += m.kmRodadosSemana;
+        totalMes += m.kmRodadosMes;
+        totalAno += m.kmRodadosAno;
+        if (m.kmRodadosMes > maiorKmRodadoMes && m.kmRodadosMes > 0) {
+          maiorKmRodadoMes = m.kmRodadosMes;
+          liderMes = `${m.motorista} — ${formatarNumero(m.kmRodadosMes)} km`;
+        }
+      });
+    } else {
+      const m = dadosGlobais.statusMotoristas.find(x => x.motorista === motoristaSelecionado);
+      if (m) {
+        totalSemana = m.kmRodadosSemana;
+        totalMes = m.kmRodadosMes;
+        totalAno = m.kmRodadosAno;
+        liderMes = "Veículo: " + m.veiculo;
+      }
+    }
+
+    animarDigitos('kpiSemana', totalSemana);
+    animarDigitos('kpiMes', totalMes);
+    animarDigitos('kpiAno', totalAno);
+    document.getElementById('kpiLider').textContent = liderMes;
+
+    // 3. STATUS DA FROTA (gauges)
+    const frotaWrap = document.getElementById('frotaStatusWrap');
+    frotaWrap.innerHTML = "";
+    const listaFrota = motoristaSelecionado === "GERAL"
+      ? dadosGlobais.statusMotoristas
+      : dadosGlobais.statusMotoristas.filter(m => m.motorista === motoristaSelecionado);
+
+    if (!listaFrota.length) {
+      frotaWrap.innerHTML = `<p class="text-sm text-[var(--muted)] py-6">Nenhum motorista cadastrado na aba "Configuracoes".</p>`;
+    } else {
+      listaFrota.forEach(m => {
+        const pct = m.kmAlerta > 0 ? Math.min(100, (m.ultimoKm / m.kmAlerta) * 100) : 0;
+        const cor = pct >= 100 ? 'var(--red)' : (pct >= 75 ? 'var(--amber)' : 'var(--teal)');
+        const top = destinoTop(m.lugaresVisitados);
+        frotaWrap.innerHTML += `
+          <div class="panel p-4 w-64 shrink-0 rise">
+            <div class="flex justify-between items-start mb-2">
+              <div>
+                <h5 class="font-bold text-white text-sm">${m.motorista}</h5>
+                <p class="text-[11px] text-[var(--muted)] uppercase tracking-wide">${m.veiculo}</p>
+              </div>
+              <span class="mono text-xs font-semibold" style="color:${cor}">${Math.round(pct)}%</span>
+            </div>
+            <div class="gauge-track mb-2">
+              <div class="gauge-fill" style="width:${pct}%; background:${cor};"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-[var(--muted)] mono mb-2">
+              <span>${formatarNumero(m.ultimoKm)} km</span>
+              <span>limite ${formatarNumero(m.kmAlerta)} km</span>
+            </div>
+            ${top ? `<span class="chip"><i class="fa-solid fa-location-dot"></i> ${top}</span>` : ''}
+          </div>
+        `;
+      });
+    }
+
+    // 4. TABELA
+    document.getElementById('contadorRegistros').textContent = `${viagensFiltradas.length} registros`;
+    const tbody = document.getElementById('tabelaViagensBody');
+    tbody.innerHTML = "";
+
+    if (viagensFiltradas.length === 0) {
+      tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-10 text-center text-[var(--muted)] font-medium">Nenhuma viagem encontrada para esta seleção.</td></tr>`;
+    } else {
+      viagensFiltradas.forEach(v => {
+        const dataFmt = new Date(v.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+        tbody.innerHTML += `
+          <tr class="transition-colors">
+            <td class="px-4 py-3 font-semibold text-white whitespace-nowrap mono text-xs">${dataFmt}</td>
+            <td class="px-4 py-3">
+              <div class="font-bold text-[var(--amber)] text-xs">${v.motorista}</div>
+              <div class="text-xs text-[var(--muted)] font-medium">${v.veiculo}</div>
+            </td>
+            <td class="px-4 py-3">
+              <div class="text-xs"><span class="text-[var(--muted-2)] font-semibold">DE:</span> ${v.origem}</div>
+              <div class="text-xs"><span class="text-[var(--muted-2)] font-semibold">PARA:</span> ${v.destino}</div>
+            </td>
+            <td class="px-4 py-3 text-right whitespace-nowrap text-xs mono">
+              <span class="text-[var(--muted)]">${formatarNumero(v.kmInicial)}</span> → <span class="text-[var(--ink)]">${formatarNumero(v.kmFinal)}</span>
+            </td>
+            <td class="px-4 py-3 text-right font-bold text-white whitespace-nowrap mono">${formatarNumero(v.kmRodado)} km</td>
+            <td class="px-4 py-3 text-center">
+              <button onclick="prepararEdicao('${v.id}')" class="btn-ghost px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer" title="Editar">
+                <i class="fa-solid fa-xs fa-pen"></i> Editar
+              </button>
+            </td>
+          </tr>
+        `;
+      });
+    }
+
+    processarERenderizarGraficos(viagensFiltradas);
+  }
+
+  function processarERenderizarGraficos(viagens) {
+    const agrupadoData = {};
+    [...viagens].reverse().forEach(v => {
+      const dFmt = new Date(v.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }).substring(0, 5);
+      agrupadoData[dFmt] = (agrupadoData[dFmt] || 0) + v.kmRodado;
     });
 
-    // Consome a API do Google Sheets
-    async function carregarDados() {
-      const btnIcon = document.getElementById('btnRecarregarIcon');
-      btnIcon.classList.add('fa-spin');
+    const categoriasLinha = Object.keys(agrupadoData).slice(-15);
+    const valoresLinha = Object.values(agrupadoData).slice(-15);
 
-      try {
-        // Adiciona um número aleatório no final para evitar que o navegador use dados velhos do cache
-        const urlComCacheBuster = API_URL + "?_nocache=" + new Date().getTime();
+    const optionsEvolucao = {
+      chart: { type: 'area', height: 260, toolbar: { show: false }, background: 'transparent', fontFamily: 'IBM Plex Mono, monospace' },
+      theme: { mode: 'dark' },
+      stroke: { curve: 'smooth', colors: ['#f2a93b'], width: 3 },
+      fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, gradientToColors: ['#0d1424'] } },
+      colors: ['#f2a93b'],
+      series: [{ name: 'Km rodados', data: valoresLinha }],
+      xaxis: { categories: categoriasLinha, axisBorder: { show: false }, labels: { style: { colors: '#8f9bc2' } } },
+      yaxis: { labels: { style: { colors: '#8f9bc2' } } },
+      grid: { borderColor: '#2a3860', strokeDashArray: 4 },
+      dataLabels: { enabled: false },
+      tooltip: { theme: 'dark' }
+    };
 
-        const response = await fetch(urlComCacheBuster, {
-          method: 'GET', // Força explicitamente o método correto de leitura
-          redirect: 'follow'
-        });
+    if (chartEvolucaoObj) chartEvolucaoObj.destroy();
+    chartEvolucaoObj = new ApexCharts(document.getElementById("chartEvolucao"), optionsEvolucao);
+    chartEvolucaoObj.render();
 
-        const resJson = await response.json();
-
-        if (resJson.sucesso) {
-          dadosGlobais = resJson;
-          atualizarDropdownMotoristas();
-          renderizarDashboard();
-        } else {
-          alert("Erro ao ler dados da planilha: " + resJson.erro);
-        }
-      } catch (err) {
-        console.error(err);
-        // Remove o alerta invasivo e deixa apenas o log se necessário
-      } finally {
-        btnIcon.classList.remove('fa-spin');
+    const agrupadoDestino = {};
+    viagens.forEach(v => {
+      if (v.destino) {
+        const dest = v.destino.trim().toUpperCase();
+        agrupadoDestino[dest] = (agrupadoDestino[dest] || 0) + 1;
       }
+    });
+
+    const topDestinos = Object.entries(agrupadoDestino).sort((a, b) => b[1] - a[1]).slice(0, 5);
+    const categoriasDestino = topDestinos.map(x => x[0]);
+    const valoresDestino = topDestinos.map(x => x[1]);
+
+    const optionsDestinos = {
+      chart: { type: 'bar', height: 260, toolbar: { show: false }, background: 'transparent', fontFamily: 'IBM Plex Mono, monospace' },
+      theme: { mode: 'dark' },
+      plotOptions: { bar: { borderRadius: 5, horizontal: true, barHeight: '55%' } },
+      colors: ['#45c1a8'],
+      series: [{ name: 'Visitas', data: valoresDestino }],
+      xaxis: { categories: categoriasDestino, labels: { style: { colors: '#8f9bc2' } } },
+      yaxis: { labels: { style: { colors: '#8f9bc2' } } },
+      grid: { borderColor: '#2a3860', strokeDashArray: 4 },
+      tooltip: { theme: 'dark' }
+    };
+
+    if (chartDestinosObj) chartDestinosObj.destroy();
+    chartDestinosObj = new ApexCharts(document.getElementById("chartDestinos"), optionsDestinos);
+    chartDestinosObj.render();
+  }
+
+  function prepararEdicao(id) {
+    const v = dadosGlobais.viagens.find(x => x.id === id);
+    if (!v) return;
+
+    document.getElementById('formId').value = v.id;
+    document.getElementById('formData').value = v.data.substring(0, 10);
+    document.getElementById('formMotorista').value = v.motorista;
+    document.getElementById('formVeiculo').value = v.veiculo;
+    document.getElementById('formOrigem').value = v.origem;
+    document.getElementById('formKmInicial').value = v.kmInicial;
+    document.getElementById('formDestino').value = v.destino;
+    document.getElementById('formKmFinal').value = v.kmFinal;
+
+    document.getElementById('tituloFormulario').textContent = "Editar viagem selecionada";
+    document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-pen-to-square mr-1"></i> Atualizar registro';
+    document.getElementById('btnCancelarEdicao').classList.remove('hidden');
+
+    document.getElementById('formViagem').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function limparFormulario() {
+    document.getElementById('formId').value = "";
+    document.getElementById('formViagem').reset();
+    document.getElementById('formData').valueAsDate = new Date();
+
+    document.getElementById('tituloFormulario').textContent = "Registrar nova viagem";
+    document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Salvar registro';
+    document.getElementById('btnCancelarEdicao').classList.add('hidden');
+  }
+
+  async function salvarDadosFormulario(event) {
+    event.preventDefault();
+    const btn = document.getElementById('btnSalvar');
+    const originalHtml = btn.innerHTML;
+
+    const id = document.getElementById('formId').value;
+    const acao = id ? "editarViagem" : "salvarViagem";
+
+    const payload = {
+      id: id,
+      acao: acao,
+      data: document.getElementById('formData').value,
+      motorista: document.getElementById('formMotorista').value.toUpperCase().trim(),
+      veiculo: document.getElementById('formVeiculo').value.toUpperCase().trim(),
+      origem: document.getElementById('formOrigem').value.trim(),
+      destino: document.getElementById('formDestino').value.trim(),
+      kmInicial: Number(document.getElementById('formKmInicial').value),
+      kmFinal: Number(document.getElementById('formKmFinal').value)
+    };
+
+    if (payload.kmFinal < payload.kmInicial) {
+      showToast("O km final não pode ser menor que o km inicial.", "error");
+      return;
     }
 
-    // Alimenta o Dropdown dinamicamente com base nos motoristas cadastrados
-    function atualizarDropdownMotoristas() {
-      const select = document.getElementById('filtroMotorista');
-      const valorAtual = select.value;
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Gravando...';
 
-      // Reseta mantendo apenas o global
-      select.innerHTML = '<option value="GERAL">Todos os Motoristas</option>';
-
-      dadosGlobais.statusMotoristas.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m.motorista;
-        opt.textContent = m.motorista;
-        select.appendChild(opt);
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors', // necessário pois o Apps Script não envia cabeçalhos CORS no POST
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
       });
 
-      select.value = valorAtual;
+      showToast(id ? "Registro atualizado com sucesso." : "Viagem registrada com sucesso.", "success");
+      limparFormulario();
+      setTimeout(carregarDados, 3000);
+    } catch (err) {
+      console.error(err);
+      showToast("Ocorreu um problema ao salvar as informações.", "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
     }
-
-    // Renderiza e filtra toda a tela baseada no motorista selecionado
-    function renderizarDashboard() {
-      const motoristaSelecionado = document.getElementById('filtroMotorista').value;
-
-      // Filtrar Viagens
-      const viagensFiltradas = motoristaSelecionado === "GERAL"
-        ? dadosGlobais.viagens
-        : dadosGlobais.viagens.filter(v => v.motorista === motoristaSelecionado);
-
-      // 1. ATUALIZAR ALERTAS DE QUILOMETRAGEM CRÍTICOS
-      const containerAlertas = document.getElementById('containerAlertas');
-      containerAlertas.innerHTML = "";
-      let temAlertaAtivo = false;
-
-      dadosGlobais.statusMotoristas.forEach(m => {
-        if (motoristaSelecionado === "GERAL" || m.motorista === motoristaSelecionado) {
-          if (m.atingiuAlerta) {
-            temAlertaAtivo = true;
-            const excesso = Math.abs(m.diferencaAlerta);
-            containerAlertas.innerHTML += `
-              <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg animate-pulse">
-                <div class="flex items-center gap-3">
-                  <div class="bg-red-500 text-slate-900 p-2 rounded-xl"><i class="fa-solid fa-triangle-exclamation text-base"></i></div>
-                  <div>
-                    <h5 class="font-bold text-white text-sm">ALERTA MANUTENÇÃO: ${m.motorista} (${m.veiculo})</h5>
-                    <p class="text-xs text-red-400">O veículo alcançou ${m.ultimoKm} km e ultrapassou o limite estipulado de ${m.kmAlerta} km.</p>
-                  </div>
-                </div>
-                <span class="bg-red-500 text-slate-950 font-black px-3 py-1 rounded-lg text-xs">+ ${excesso} KM</span>
-              </div>
-            `;
-          }
-        }
-      });
-      containerAlertas.classList.toggle('hidden', !temAlertaAtivo);
-
-      // 2. ATUALIZAR CARDS KPIs.
-      let totalSemana = 0, totalMes = 0, totalAno = 0;
-      let maiorKmRodadoMes = -1;
-      let liderMes = "Nenhum";
-
-      if (motoristaSelecionado === "GERAL") {
-        dadosGlobais.statusMotoristas.forEach(m => {
-          totalSemana += m.kmRodadosSemana;
-          totalMes += m.kmRodadosMes;
-          totalAno += m.kmRodadosAno;
-          if (m.kmRodadosMes > maiorKmRodadoMes && m.kmRodadosMes > 0) {
-            maiorKmRodadoMes = m.kmRodadosMes;
-            liderMes = `${m.motorista} (${m.kmRodadosMes} km)`;
-          }
-        });
-      } else {
-        const m = dadosGlobais.statusMotoristas.find(x => x.motorista === motoristaSelecionado);
-        if (m) {
-          totalSemana = m.kmRodadosSemana;
-          totalMes = m.kmRodadosMes;
-          totalAno = m.kmRodadosAno;
-          liderMes = m.veiculo; // Mostra o carro correspondente se filtrado por 1
-        }
-      }
-
-      document.getElementById('kpiSemana').innerHTML = `${totalSemana} <span class="text-sm font-normal text-slate-400">km</span>`;
-      document.getElementById('kpiMes').innerHTML = `${totalMes} <span class="text-sm font-normal text-slate-400">km</span>`;
-      document.getElementById('kpiAno').innerHTML = `${totalAno} <span class="text-sm font-normal text-slate-400">km</span>`;
-      document.getElementById('kpiLider').textContent = motoristaSelecionado === "GERAL" ? liderMes : "Veículo: " + liderMes;
-
-      // 3. RENDERIZAR TABELA DE HISTÓRICO
-      document.getElementById('contadorRegistros').textContent = `${viagensFiltradas.length} registros`;
-      const tbody = document.getElementById('tabelaViagensBody');
-      tbody.innerHTML = "";
-
-      if (viagensFiltradas.length === 0) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500 font-medium">Nenhuma viagem encontrada para esta seleção.</td></tr>`;
-      } else {
-        viagensFiltradas.forEach(v => {
-          const dataFmt = new Date(v.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
-          tbody.innerHTML += `
-            <tr class="hover:bg-slate-700/30 transition-colors">
-              <td class="px-4 py-3 font-semibold text-white whitespace-nowrap">${dataFmt}</td>
-              <td class="px-4 py-3">
-                <div class="font-bold text-teal-400 text-xs">${v.motorista}</div>
-                <div class="text-xs text-slate-400 font-medium">${v.veiculo}</div>
-              </td>
-              <td class="px-4 py-3">
-                <div class="text-xs"><span class="text-slate-500 font-semibold">DE:</span> ${v.origem}</div>
-                <div class="text-xs"><span class="text-slate-500 font-semibold">PARA:</span> ${v.destino}</div>
-              </td>
-              <td class="px-4 py-3 text-right whitespace-nowrap text-xs font-mono">
-                <span class="text-slate-400">${v.kmInicial}</span> → <span class="text-slate-200">${v.kmFinal}</span>
-              </td>
-              <td class="px-4 py-3 text-right font-bold text-white whitespace-nowrap">${v.kmRodado} km</td>
-              <td class="px-4 py-3 text-center">
-                <button onclick="prepararEdicao('${v.id}')" class="bg-slate-700 border border-slate-600 text-teal-400 hover:bg-teal-500 hover:text-slate-950 px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer" title="Editar">
-                  <i class="fa-solid fa-xs fa-pen"></i> Editar
-                </button>
-              </td>
-            </tr>
-          `;
-        });
-      }
-
-      // 4. ATUALIZAR GRÁFICOS (Evolução de KM e Destinos)
-      processarERenderizarGraficos(viagensFiltradas);
-    }
-
-    // Processamento de dados e plotagem dos Gráficos Interativos ApexCharts
-    function processarERenderizarGraficos(viagens) {
-      // A. Gráfico de Linha (Últimos 15 dias rodados)
-      const agrupadoData = {};
-      // Pegar os registros em ordem cronológica para o gráfico
-      [...viagens].reverse().forEach(v => {
-        const dFmt = new Date(v.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }).substring(0, 5); // DD/MM
-        agrupadoData[dFmt] = (agrupadoData[dFmt] || 0) + v.kmRodado;
-      });
-
-      const categoriasLinha = Object.keys(agrupadoData).slice(-15);
-      const valoresLinha = Object.values(agrupadoData).slice(-15);
-
-      const optionsEvolucao = {
-        chart: { type: 'area', height: 260, toolbar: { show: false }, background: 'transparent' },
-        theme: { mode: 'dark' },
-        stroke: { curve: 'smooth', colors: ['#14b8a6'], width: 3 },
-        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.05 } },
-        colors: ['#14b8a6'],
-        series: [{ name: 'KMs Rodados', data: valoresLinha }],
-        xaxis: { categories: categoriasLinha, axisBorder: { show: false } },
-        grid: { borderColor: '#334155', strokeDashArray: 4 },
-        dataLabels: { enabled: false }
-      };
-
-      if (chartEvolucaoObj) chartEvolucaoObj.destroy();
-      chartEvolucaoObj = new ApexCharts(document.getElementById("chartEvolucao"), optionsEvolucao);
-      chartEvolucaoObj.render();
-
-      // B. Gráfico de Destinos (Agrupamento dos Top 5 lugares)
-      const agrupadoDestino = {};
-      viagens.forEach(v => {
-        if (v.destino) {
-          const dest = v.destino.trim().toUpperCase();
-          agrupadoDestino[dest] = (agrupadoDestino[dest] || 0) + 1;
-        }
-      });
-
-      const topDestinos = Object.entries(agrupadoDestino)
-        .sort((a, b) => b[1] - a[1])
-        .slice(0, 5);
-
-      const categoriasDestino = topDestinos.map(x => x[0]);
-      const valoresDestino = topDestinos.map(x => x[1]);
-
-      const optionsDestinos = {
-        chart: { type: 'bar', height: 260, toolbar: { show: false } },
-        theme: { mode: 'dark' },
-        plotOptions: { bar: { borderRadius: 5, horizontal: true, barHeight: '55%' } },
-        colors: ['#38bdf8'],
-        series: [{ name: 'Visitas', data: valoresDestino }],
-        xaxis: { categories: categoriasDestino },
-        grid: { borderColor: '#334155', strokeDashArray: 4 }
-      };
-
-      if (chartDestinosObj) chartDestinosObj.destroy();
-      chartDestinosObj = new ApexCharts(document.getElementById("chartDestinos"), optionsDestinos);
-      chartDestinosObj.render();
-    }
-
-    // Transfere os dados da tabela para o formulário de edição
-    function幕prepararEdicao(id) {
-      const v = dadosGlobais.viagens.find(x => x.id === id);
-      if (!v) return;
-
-      document.getElementById('formId').value = v.id;
-      document.getElementById('formData').value = v.data.substring(0, 10);
-      document.getElementById('formMotorista').value = v.motorista;
-      document.getElementById('formVeiculo').value = v.veiculo;
-      document.getElementById('formOrigem').value = v.origem;
-      document.getElementById('formKmInicial').value = v.kmInicial;
-      document.getElementById('formDestino').value = v.destino;
-      document.getElementById('formKmFinal').value = v.kmFinal;
-
-      document.getElementById('tituloFormulario').textContent = "Editar Viagem Selecionada";
-      document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-pen-to-square mr-1"></i> Atualizar Registro';
-      document.getElementById('btnCancelarEdicao').classList.remove('hidden');
-
-      // Sobe a tela de forma suave até o formulário em dispositivos móveis
-      document.getElementById('formViagem').scrollIntoView({ behavior: 'smooth' });
-    }
-
-    // Cancela a edição e limpa os campos
-    function limparFormulario() {
-      document.getElementById('formId').value = "";
-      document.getElementById('formViagem').reset();
-      document.getElementById('formData').valueAsDate = new Date();
-
-      document.getElementById('tituloFormulario').textContent = "Registrar Nova Viagem";
-      document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Registro';
-      document.getElementById('btnCancelarEdicao').classList.add('hidden');
-    }
-
-    // Envia os dados criados/editados para a API via POST
-    async function salvarDadosFormulario(event) {
-      event.preventDefault();
-      const btn = document.getElementById('btnSalvar');
-      const originalHtml = btn.innerHTML;
-
-      const id = document.getElementById('formId').value;
-      const acao = id ? "editarViagem" : "salvarViagem";
-
-      const payload = {
-        id: id,
-        acao: acao,
-        data: document.getElementById('formData').value,
-        motorista: document.getElementById('formMotorista').value.toUpperCase().trim(),
-        veiculo: document.getElementById('formVeiculo').value.toUpperCase().trim(),
-        origem: document.getElementById('formOrigem').value.trim(),
-        destino: document.getElementById('formDestino').value.trim(),
-        kmInicial: Number(document.getElementById('formKmInicial').value),
-        kmFinal: Number(document.getElementById('formKmFinal').value)
-      };
-
-      if (payload.kmFinal < payload.kmInicial) {
-        alert("Erro lógico: O KM final de chegada não pode ser menor do que o KM inicial de saída.");
-        return;
-      }
-
-      btn.disabled = true;
-      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Gravando...';
-
-      try {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          mode: 'no-cors', // OBRIGATÓRIO para requisições externas do Apps Script no Google
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-
-        alert("Comando enviado com sucesso! Aguarde de 3 a 5 segundos para a planilha processar e clique no botão de atualizar no topo.");
-        limparFormulario();
-        // Recarrega os dados para puxar o novo estado
-        setTimeout(carregarDados, 3000);
-      } catch (err) {
-        console.error(err);
-        alert("Ocorreu um problema ao salvar as informações.");
-      } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalHtml;
-      }
-    }
-  </script>
+  }
+</script>
 </body>
-
 </html>
