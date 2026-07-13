@@ -6,6 +6,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Controle de Frota — Fiocruz Minas</title>
 
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=IBM+Plex+Mono:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -451,10 +452,10 @@
   }
 
   // ---------- Carregamento ----------
-  async function carregarDados() {
+  async function carregarDados(tentativaInterna = false) {
     const btnIcon = document.getElementById('btnRecarregarIcon');
     btnIcon.classList.add('fa-spin');
-    document.getElementById('bannerErro').classList.add('hidden');
+    if (!tentativaInterna) document.getElementById('bannerErro').classList.add('hidden');
 
     try {
       const urlComCacheBuster = API_URL + "?_nocache=" + new Date().getTime();
@@ -462,12 +463,21 @@
 
       if (!response.ok) throw new Error("HTTP " + response.status);
 
-      const resJson = await response.json();
+      const textoBruto = await response.text();
+      let resJson;
+      try {
+        resJson = JSON.parse(textoBruto);
+      } catch (erroParse) {
+        // O Google costuma devolver uma página HTML (não JSON) quando a implantação
+        // está travada, precisa de reautorização, ou está "esquentando" (cold start).
+        throw new Error("RESPOSTA_NAO_JSON");
+      }
 
       if (resJson.sucesso) {
         dadosGlobais = resJson;
         atualizarDropdownMotoristas();
         renderizarDashboard();
+        document.getElementById('bannerErro').classList.add('hidden');
         document.getElementById('statusSync').textContent =
           "Atualizado às " + new Date().toLocaleTimeString('pt-BR');
       } else {
@@ -475,7 +485,16 @@
       }
     } catch (err) {
       console.error(err);
-      mostrarErroCarregamento("Falha de conexão com o Apps Script. Isso costuma acontecer quando a implantação não está publicada com acesso \"Qualquer pessoa\", ou a URL mudou após um novo deploy.");
+      // Primeira falha: tenta mais uma vez automaticamente após 1.5s (cobre "cold start" do Apps Script)
+      if (!tentativaInterna) {
+        setTimeout(() => carregarDados(true), 1500);
+        return;
+      }
+      if (err.message === "RESPOSTA_NAO_JSON") {
+        mostrarErroCarregamento("O Apps Script respondeu com uma página HTML em vez de dados. Normalmente isso indica que a implantação precisa de uma nova versão (Implantar → Gerenciar implantações → editar → Nova versão) ou de reautorização de permissões. Abra a URL da API direto no navegador para conferir o que ela retorna.");
+      } else {
+        mostrarErroCarregamento("Falha de conexão com o Apps Script. Confira se a implantação está publicada com acesso \"Qualquer pessoa\" e se a URL em API_URL é a da implantação ativa mais recente.");
+      }
     } finally {
       btnIcon.classList.remove('fa-spin');
     }
