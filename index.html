@@ -133,6 +133,33 @@
     transition:width .8s cubic-bezier(.2,.8,.2,1);
   }
 
+  /* ---------- Card em estado de alerta (limite atingido) ---------- */
+  .card-limite{
+    border-color:rgba(232,86,79,.55) !important;
+    background:
+      repeating-linear-gradient(135deg, rgba(232,86,79,.16) 0 12px, rgba(232,86,79,.05) 12px 24px),
+      linear-gradient(180deg, #201323, #150c14);
+    animation:pulseRed 1.8s ease-in-out infinite;
+  }
+  @keyframes pulseRed{
+    0%,100%{ box-shadow:0 0 0 0 rgba(232,86,79,.45); }
+    50%{ box-shadow:0 0 0 9px rgba(232,86,79,0); }
+  }
+  .bolt-alert{
+    color:var(--red);
+    animation:blinker 1s ease-in-out infinite;
+    filter:drop-shadow(0 0 6px rgba(232,86,79,.7));
+  }
+  .chip-limite{
+    background:rgba(232,86,79,.15);
+    border-color:rgba(232,86,79,.5);
+    color:var(--red);
+  }
+  @media (prefers-reduced-motion: reduce){
+    .card-limite{animation:none;}
+    .bolt-alert{animation:none;}
+  }
+
   .chip{
     display:inline-flex;align-items:center;gap:.35rem;
     background:var(--surface-2);
@@ -607,14 +634,17 @@
         const pct = m.kmAlerta > 0 ? Math.min(100, (m.ultimoKm / m.kmAlerta) * 100) : 0;
         const cor = pct >= 100 ? 'var(--red)' : (pct >= 75 ? 'var(--amber)' : 'var(--teal)');
         const top = destinoTop(m.lugaresVisitados);
+        const atingiu = !!m.atingiuAlerta;
         frotaWrap.innerHTML += `
-          <div class="panel p-4 w-64 shrink-0 rise">
+          <div class="panel p-4 w-64 shrink-0 rise ${atingiu ? 'card-limite' : ''}">
             <div class="flex justify-between items-start mb-2">
               <div>
                 <h5 class="font-bold text-white text-sm">${m.motorista}</h5>
                 <p class="text-[11px] text-[var(--muted)] uppercase tracking-wide">${m.veiculo}</p>
               </div>
-              <span class="mono text-xs font-semibold" style="color:${cor}">${Math.round(pct)}%</span>
+              ${atingiu
+                ? `<i class="fa-solid fa-bolt bolt-alert text-lg" title="Limite atingido"></i>`
+                : `<span class="mono text-xs font-semibold" style="color:${cor}">${Math.round(pct)}%</span>`}
             </div>
             <div class="gauge-track mb-2">
               <div class="gauge-fill" style="width:${pct}%; background:${cor};"></div>
@@ -623,7 +653,9 @@
               <span>${formatarNumero(m.ultimoKm)} km</span>
               <span>limite ${formatarNumero(m.kmAlerta)} km</span>
             </div>
-            ${top ? `<span class="chip"><i class="fa-solid fa-location-dot"></i> ${top}</span>` : ''}
+            ${atingiu
+              ? `<span class="chip chip-limite"><i class="fa-solid fa-triangle-exclamation"></i> Limite atingido</span>`
+              : (top ? `<span class="chip"><i class="fa-solid fa-location-dot"></i> ${top}</span>` : '')}
           </div>
         `;
       });
