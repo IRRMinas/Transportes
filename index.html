@@ -1,0 +1,475 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Controle de Motoristas - Fiocruz Minas</title>
+  <script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/apexcharts"></script>
+</head>
+<body class="bg-slate-900 text-slate-100 font-sans min-h-screen">
+
+  <script>
+    const API_URL = "https://script.google.com/macros/s/AKfycbxD2MGdyiH0AGZ4mgYl_cnBkaeAQw2Lz5y7xXMuAot15FCgbiry9JwNTGWt14hNE7UO/exec";
+  </script>
+
+  <header class="bg-slate-800 border-b border-slate-700 shadow-xl sticky top-0 z-50">
+    <div class="max-w-7xl mx-auto px-4 py-4 flex flex-col sm:flex-row justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="bg-teal-500 p-2.5 rounded-xl shadow-lg shadow-teal-500/20">
+          <i class="fa-solid fa-truck-steering text-xl text-slate-900"></i>
+        </div>
+        <div>
+          <h1 class="text-xl font-bold tracking-tight text-white">Controle de Frota & Motoristas</h1>
+          <p class="text-xs text-slate-400 font-medium">Prestação de Contas — Fiocruz Minas</p>
+        </div>
+      </div>
+      
+      <div class="flex items-center gap-2 w-full sm:w-auto">
+        <label for="filtroMotorista" class="text-sm font-semibold text-slate-400 whitespace-nowrap"><i class="fa-solid fa-filter mr-1"></i> Filtrar por:</label>
+        <select id="filtroMotorista" onchange="renderizarDashboard()" class="w-full sm:w-48 bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white font-medium focus:outline-none focus:border-teal-500 transition-colors cursor-pointer">
+          <option value="GERAL">Todos os Motoristas</option>
+        </select>
+        <button onclick="carregarDados()" class="bg-slate-700 border border-slate-600 hover:bg-slate-600 text-slate-300 p-2 rounded-lg text-sm transition-colors cursor-pointer" title="Atualizar dados">
+          <i id="btnRecarregarIcon" class="fa-solid fa-arrow-rotate-right"></i>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+    <div id="containerAlertas" class="hidden grid grid-cols-1 gap-4">
+      </div>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 text-slate-700/20 text-7xl group-hover:scale-110 transition-transform duration-300"><i class="fa-solid fa-calendar-week"></i></div>
+        <p class="text-sm font-semibold text-slate-400 mb-1">KM Rodados na Semana</p>
+        <h3 id="kpiSemana" class="text-3xl font-extrabold text-white">0 <span class="text-sm font-normal text-slate-400">km</span></h3>
+      </div>
+      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 text-slate-700/20 text-7xl group-hover:scale-110 transition-transform duration-300"><i class="fa-solid fa-calendar-days"></i></div>
+        <p class="text-sm font-semibold text-slate-400 mb-1">KM Rodados no Mês</p>
+        <h3 id="kpiMes" class="text-3xl font-extrabold text-teal-400">0 <span class="text-sm font-normal text-slate-400">km</span></h3>
+      </div>
+      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 text-slate-700/20 text-7xl group-hover:scale-110 transition-transform duration-300"><i class="fa-solid fa-calendar"></i></div>
+        <p class="text-sm font-semibold text-slate-400 mb-1">KM Rodados no Ano</p>
+        <h3 id="kpiAno" class="text-3xl font-extrabold text-white">0 <span class="text-sm font-normal text-slate-400">km</span></h3>
+      </div>
+      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg relative overflow-hidden group">
+        <div class="absolute -right-4 -bottom-4 text-slate-700/20 text-7xl group-hover:scale-110 transition-transform duration-300"><i class="fa-solid fa-id-card"></i></div>
+        <p class="text-sm font-semibold text-slate-400 mb-1">Líder de Rodagem (Mês)</p>
+        <h3 id="kpiLider" class="text-xl font-bold text-teal-400 mt-1 truncate">-</h3>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg lg:col-span-2">
+        <h4 class="text-base font-bold text-white mb-4"><i class="fa-solid fa-chart-line text-teal-500 mr-2"></i>Evolução de Km Rodados por Dia</h4>
+        <div id="chartEvolucao"></div>
+      </div>
+      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg">
+        <h4 class="text-base font-bold text-white mb-4"><i class="fa-solid fa-map-location-dot text-teal-500 mr-2"></i>Destinos Mais Visitados</h4>
+        <div id="chartDestinos"></div>
+      </div>
+    </div>
+
+    <div class="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      
+      <div class="bg-slate-800 p-5 rounded-2xl border border-slate-700/60 shadow-lg sticky top-24">
+        <div class="flex items-center gap-2 mb-4 border-b border-slate-700 pb-3">
+          <i class="fa-solid fa-pen-to-square text-teal-500 text-lg"></i>
+          <h4 id="tituloFormulario" class="text-base font-bold text-white">Registrar Nova Viagem</h4>
+        </div>
+        
+        <form id="formViagem" onsubmit="salvarDadosFormulario(event)" class="space-y-4">
+          <input type="hidden" id="formId">
+          
+          <div>
+            <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Data da Viagem</label>
+            <input type="date" id="formData" required class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white focus:outline-none focus:border-teal-500">
+          </div>
+          
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Motorista</label>
+              <input type="text" id="formMotorista" required placeholder="Ex: MAGNO" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 uppercase">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Veículo</label>
+              <input type="text" id="formVeiculo" required placeholder="Ex: PICAPE" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500 uppercase">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Local Origem</label>
+              <input type="text" id="formOrigem" required placeholder="Ex: Sede" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">Local Destino</label>
+              <input type="text" id="formDestino" required placeholder="Ex: Fiocruz" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">KM Inicial (Saída)</label>
+              <input type="number" id="formKmInicial" required placeholder="0" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+            </div>
+            <div>
+              <label class="block text-xs font-semibold text-slate-400 uppercase tracking-wider mb-1">KM Final (Chegada)</label>
+              <input type="number" id="formKmFinal" required placeholder="0" class="w-full bg-slate-700 border border-slate-600 rounded-lg px-3 py-2 text-sm text-white placeholder-slate-500 focus:outline-none focus:border-teal-500">
+            </div>
+          </div>
+
+          <div class="pt-2 flex gap-2">
+            <button type="submit" id="btnSalvar" class="flex-1 bg-teal-500 hover:bg-teal-400 active:bg-teal-600 text-slate-950 font-bold py-2.5 rounded-lg text-sm transition-colors shadow-lg shadow-teal-500/10 cursor-pointer">
+              <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Registro
+            </button>
+            <button type="button" id="btnCancelarEdicao" onclick="limparFormulario()" class="hidden bg-slate-700 hover:bg-slate-600 text-slate-300 px-3 py-2.5 rounded-lg text-sm transition-colors cursor-pointer">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="bg-slate-800 rounded-2xl border border-slate-700/60 shadow-lg lg:col-span-2 overflow-hidden">
+        <div class="p-5 border-b border-slate-700 bg-slate-800/50 flex justify-between items-center">
+          <h4 class="text-base font-bold text-white"><i class="fa-solid fa-list-check text-teal-500 mr-2"></i>Histórico Completo de Viagens</h4>
+          <span id="contadorRegistros" class="text-xs bg-slate-700 border border-slate-600 text-slate-300 px-2.5 py-1 rounded-full font-semibold">0 registros</span>
+        </div>
+        
+        <div class="overflow-x-auto">
+          <table class="w-full border-collapse text-left text-sm">
+            <thead>
+              <tr class="border-b border-slate-700 bg-slate-900/40 text-slate-400 font-semibold uppercase text-xs tracking-wider">
+                <th class="px-4 py-3">Data</th>
+                <th class="px-4 py-3">Motorista / Carro</th>
+                <th class="px-4 py-3">Trajeto</th>
+                <th class="px-4 py-3 text-right">KMs Odômetro</th>
+                <th class="px-4 py-3 text-right">Total</th>
+                <th class="px-4 py-3 text-center">Ações</th>
+              </tr>
+            </thead>
+            <tbody id="tabelaViagensBody" class="divide-y divide-slate-700/50 text-slate-300">
+              <tr>
+                <td colspan="6" class="px-4 py-8 text-center text-slate-500 font-medium">
+                  <i class="fa-solid fa-spinner fa-spin mr-2 text-teal-500 text-base"></i> Carregando registros do Google Sheets...
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </main>
+
+  <script>
+    let dadosGlobais = { statusMotoristas: [], viagens: [] };
+    let chartEvolucaoObj = null;
+    let chartDestinosObj = null;
+
+    // Inicialização ao carregar a página
+    document.addEventListener("DOMContentLoaded", () => {
+      // Seta data de hoje por padrão no formulário
+      document.getElementById('formData').valueAsDate = new Date();
+      carregarDados();
+    });
+
+    // Consome a API do Google Sheets
+    async function carregarDados() {
+      const btnIcon = document.getElementById('btnRecarregarIcon');
+      btnIcon.classList.add('fa-spin');
+      
+      try {
+        const response = await fetch(API_URL);
+        const resJson = await response.json();
+        
+        if (resJson.sucesso) {
+          dadosGlobais = resJson;
+          atualizarDropdownMotoristas();
+          renderizarDashboard();
+        } else {
+          alert("Erro ao ler dados da planilha: " + resJson.erro);
+        }
+      } catch (err) {
+        console.error(err);
+        alert("Erro de comunicação com o Google Apps Script. Verifique se a URL da API está configurada corretamente.");
+      } finally {
+        btnIcon.classList.remove('fa-spin');
+      }
+    }
+
+    // Alimenta o Dropdown dinamicamente com base nos motoristas cadastrados
+    function atualizarDropdownMotoristas() {
+      const select = document.getElementById('filtroMotorista');
+      const valorAtual = select.value;
+      
+      // Reseta mantendo apenas o global
+      select.innerHTML = '<option value="GERAL">Todos os Motoristas</option>';
+      
+      dadosGlobais.statusMotoristas.forEach(m => {
+        const opt = document.createElement('option');
+        opt.value = m.motorista;
+        opt.textContent = m.motorista;
+        select.appendChild(opt);
+      });
+      
+      select.value = valorAtual;
+    }
+
+    // Renderiza e filtra toda a tela baseada no motorista selecionado
+    function renderizarDashboard() {
+      const motoristaSelecionado = document.getElementById('filtroMotorista').value;
+      
+      // Filtrar Viagens
+      const viagensFiltradas = motoristaSelecionado === "GERAL" 
+        ? dadosGlobais.viagens 
+        : dadosGlobais.viagens.filter(v => v.motorista === motoristaSelecionado);
+
+      // 1. ATUALIZAR ALERTAS DE QUILOMETRAGEM CRÍTICOS
+      const containerAlertas = document.getElementById('containerAlertas');
+      containerAlertas.innerHTML = "";
+      let temAlertaAtivo = false;
+
+      dadosGlobais.statusMotoristas.forEach(m => {
+        if (motoristaSelecionado === "GERAL" || m.motorista === motoristaSelecionado) {
+          if (m.atingiuAlerta) {
+            temAlertaAtivo = true;
+            const excesso = Math.abs(m.diferencaAlerta);
+            containerAlertas.innerHTML += `
+              <div class="bg-red-500/10 border border-red-500/30 rounded-2xl p-4 flex items-center justify-between shadow-lg animate-pulse">
+                <div class="flex items-center gap-3">
+                  <div class="bg-red-500 text-slate-900 p-2 rounded-xl"><i class="fa-solid fa-triangle-exclamation text-base"></i></div>
+                  <div>
+                    <h5 class="font-bold text-white text-sm">ALERTA MANUTENÇÃO: ${m.motorista} (${m.veiculo})</h5>
+                    <p class="text-xs text-red-400">O veículo alcançou ${m.ultimoKm} km e ultrapassou o limite estipulado de ${m.kmAlerta} km.</p>
+                  </div>
+                </div>
+                <span class="bg-red-500 text-slate-950 font-black px-3 py-1 rounded-lg text-xs">+ ${excesso} KM</span>
+              </div>
+            `;
+          }
+        }
+      });
+      containerAlertas.classList.toggle('hidden', !temAlertaAtivo);
+
+      // 2. ATUALIZAR CARDS KPIs
+      let totalSemana = 0, totalMes = 0, totalAno = 0;
+      let maiorKmRodadoMes = -1;
+      let liderMes = "Nenhum";
+
+      if (motoristaSelecionado === "GERAL") {
+        dadosGlobais.statusMotoristas.forEach(m => {
+          totalSemana += m.kmRodadosSemana;
+          totalMes += m.kmRodadosMes;
+          totalAno += m.kmRodadosAno;
+          if (m.kmRodadosMes > maiorKmRodadoMes && m.kmRodadosMes > 0) {
+            maiorKmRodadoMes = m.kmRodadosMes;
+            liderMes = `${m.motorista} (${m.kmRodadosMes} km)`;
+          }
+        });
+      } else {
+        const m = dadosGlobais.statusMotoristas.find(x => x.motorista === motoristaSelecionado);
+        if (m) {
+          totalSemana = m.kmRodadosSemana;
+          totalMes = m.kmRodadosMes;
+          totalAno = m.kmRodadosAno;
+          liderMes = m.veiculo; // Mostra o carro correspondente se filtrado por 1
+        }
+      }
+
+      document.getElementById('kpiSemana').innerHTML = `${totalSemana} <span class="text-sm font-normal text-slate-400">km</span>`;
+      document.getElementById('kpiMes').innerHTML = `${totalMes} <span class="text-sm font-normal text-slate-400">km</span>`;
+      document.getElementById('kpiAno').innerHTML = `${totalAno} <span class="text-sm font-normal text-slate-400">km</span>`;
+      document.getElementById('kpiLider').textContent = motoristaSelecionado === "GERAL" ? liderMes : "Veículo: " + liderMes;
+
+      // 3. RENDERIZAR TABELA DE HISTÓRICO
+      document.getElementById('contadorRegistros').textContent = `${viagensFiltradas.length} registros`;
+      const tbody = document.getElementById('tabelaViagensBody');
+      tbody.innerHTML = "";
+
+      if (viagensFiltradas.length === 0) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-4 py-8 text-center text-slate-500 font-medium">Nenhuma viagem encontrada para esta seleção.</td></tr>`;
+      } else {
+        viagensFiltradas.forEach(v => {
+          const dataFmt = new Date(v.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+          tbody.innerHTML += `
+            <tr class="hover:bg-slate-700/30 transition-colors">
+              <td class="px-4 py-3 font-semibold text-white whitespace-nowrap">${dataFmt}</td>
+              <td class="px-4 py-3">
+                <div class="font-bold text-teal-400 text-xs">${v.motorista}</div>
+                <div class="text-xs text-slate-400 font-medium">${v.veiculo}</div>
+              </td>
+              <td class="px-4 py-3">
+                <div class="text-xs"><span class="text-slate-500 font-semibold">DE:</span> ${v.origem}</div>
+                <div class="text-xs"><span class="text-slate-500 font-semibold">PARA:</span> ${v.destino}</div>
+              </td>
+              <td class="px-4 py-3 text-right whitespace-nowrap text-xs font-mono">
+                <span class="text-slate-400">${v.kmInicial}</span> → <span class="text-slate-200">${v.kmFinal}</span>
+              </td>
+              <td class="px-4 py-3 text-right font-bold text-white whitespace-nowrap">${v.kmRodado} km</td>
+              <td class="px-4 py-3 text-center">
+                <button onclick="prepararEdicao('${v.id}')" class="bg-slate-700 border border-slate-600 text-teal-400 hover:bg-teal-500 hover:text-slate-950 px-2.5 py-1.5 rounded-lg text-xs transition-colors cursor-pointer" title="Editar">
+                  <i class="fa-solid fa-xs fa-pen"></i> Editar
+                </button>
+              </td>
+            </tr>
+          `;
+        });
+      }
+
+      // 4. ATUALIZAR GRÁFICOS (Evolução de KM e Destinos)
+      processarERenderizarGraficos(viagensFiltradas);
+    }
+
+    // Processamento de dados e plotagem dos Gráficos Interativos ApexCharts
+    function processarERenderizarGraficos(viagens) {
+      // A. Gráfico de Linha (Últimos 15 dias rodados)
+      const agrupadoData = {};
+      // Pegar os registros em ordem cronológica para o gráfico
+      [...viagens].reverse().forEach(v => {
+        const dFmt = new Date(v.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' }).substring(0, 5); // DD/MM
+        agrupadoData[dFmt] = (agrupadoData[dFmt] || 0) + v.kmRodado;
+      });
+
+      const categoriasLinha = Object.keys(agrupadoData).slice(-15);
+      const valoresLinha = Object.values(agrupadoData).slice(-15);
+
+      const optionsEvolucao = {
+        chart: { type: 'area', height: 260, toolbar: { show: false }, background: 'transparent' },
+        theme: { mode: 'dark' },
+        stroke: { curve: 'smooth', colors: ['#14b8a6'], width: 3 },
+        fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.3, opacityTo: 0.05 } },
+        colors: ['#14b8a6'],
+        series: [{ name: 'KMs Rodados', data: valoresLinha }],
+        xaxis: { categories: categoriasLinha, axisBorder: { show: false } },
+        grid: { borderColor: '#334155', strokeDashArray: 4 },
+        dataLabels: { enabled: false }
+      };
+
+      if (chartEvolucaoObj) chartEvolucaoObj.destroy();
+      chartEvolucaoObj = new ApexCharts(document.getElementById("chartEvolucao"), optionsEvolucao);
+      chartEvolucaoObj.render();
+
+      // B. Gráfico de Destinos (Agrupamento dos Top 5 lugares)
+      const agrupadoDestino = {};
+      viagens.forEach(v => {
+        if (v.destino) {
+          const dest = v.destino.trim().toUpperCase();
+          agrupadoDestino[dest] = (agrupadoDestino[dest] || 0) + 1;
+        }
+      });
+
+      const topDestinos = Object.entries(agrupadoDestino)
+        .sort((a, b) => b[1] - a[1])
+        .slice(0, 5);
+
+      const categoriasDestino = topDestinos.map(x => x[0]);
+      const valoresDestino = topDestinos.map(x => x[1]);
+
+      const optionsDestinos = {
+        chart: { type: 'bar', height: 260, toolbar: { show: false } },
+        theme: { mode: 'dark' },
+        plotOptions: { bar: { borderRadius: 5, horizontal: true, barHeight: '55%' } },
+        colors: ['#38bdf8'],
+        series: [{ name: 'Visitas', data: valoresDestino }],
+        xaxis: { categories: categoriasDestino },
+        grid: { borderColor: '#334155', strokeDashArray: 4 }
+      };
+
+      if (chartDestinosObj) chartDestinosObj.destroy();
+      chartDestinosObj = new ApexCharts(document.getElementById("chartDestinos"), optionsDestinos);
+      chartDestinosObj.render();
+    }
+
+    // Transfere os dados da tabela para o formulário de edição
+    function幕prepararEdicao(id) {
+      const v = dadosGlobais.viagens.find(x => x.id === id);
+      if (!v) return;
+
+      document.getElementById('formId').value = v.id;
+      document.getElementById('formData').value = v.data.substring(0, 10);
+      document.getElementById('formMotorista').value = v.motorista;
+      document.getElementById('formVeiculo').value = v.veiculo;
+      document.getElementById('formOrigem').value = v.origem;
+      document.getElementById('formKmInicial').value = v.kmInicial;
+      document.getElementById('formDestino').value = v.destino;
+      document.getElementById('formKmFinal').value = v.kmFinal;
+
+      document.getElementById('tituloFormulario').textContent = "Editar Viagem Selecionada";
+      document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-pen-to-square mr-1"></i> Atualizar Registro';
+      document.getElementById('btnCancelarEdicao').classList.remove('hidden');
+      
+      // Sobe a tela de forma suave até o formulário em dispositivos móveis
+      document.getElementById('formViagem').scrollIntoView({ behavior: 'smooth' });
+    }
+
+    // Cancela a edição e limpa os campos
+    function limparFormulario() {
+      document.getElementById('formId').value = "";
+      document.getElementById('formViagem').reset();
+      document.getElementById('formData').valueAsDate = new Date();
+      
+      document.getElementById('tituloFormulario').textContent = "Registrar Nova Viagem";
+      document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Salvar Registro';
+      document.getElementById('btnCancelarEdicao').classList.add('hidden');
+    }
+
+    // Envia os dados criados/editados para a API via POST
+    async function salvarDadosFormulario(event) {
+      event.preventDefault();
+      const btn = document.getElementById('btnSalvar');
+      const originalHtml = btn.innerHTML;
+      
+      const id = document.getElementById('formId').value;
+      const acao = id ? "editarViagem" : "salvarViagem";
+
+      const payload = {
+        id: id,
+        acao: acao,
+        data: document.getElementById('formData').value,
+        motorista: document.getElementById('formMotorista').value.toUpperCase().trim(),
+        veiculo: document.getElementById('formVeiculo').value.toUpperCase().trim(),
+        origem: document.getElementById('formOrigem').value.trim(),
+        destino: document.getElementById('formDestino').value.trim(),
+        kmInicial: Number(document.getElementById('formKmInicial').value),
+        kmFinal: Number(document.getElementById('formKmFinal').value)
+      };
+
+      if (payload.kmFinal < payload.kmInicial) {
+        alert("Erro lógico: O KM final de chegada não pode ser menor do que o KM inicial de saída.");
+        return;
+      }
+
+      btn.disabled = true;
+      btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Gravando...';
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          mode: 'no-cors', // OBRIGATÓRIO para requisições externas do Apps Script no Google
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+
+        alert("Comando enviado com sucesso! Aguarde de 3 a 5 segundos para a planilha processar e clique no botão de atualizar no topo.");
+        limparFormulario();
+        // Recarrega os dados para puxar o novo estado
+        setTimeout(carregarDados, 3000);
+      } catch (err) {
+        console.error(err);
+        alert("Ocorreu um problema ao salvar as informações.");
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+      }
+    }
+  </script>
+</body>
+</html>
