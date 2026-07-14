@@ -1,0 +1,425 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Registrar Viagem — Fiocruz Minas</title>
+
+<script src="https://cdn.jsdelivr.net/npm/@tailwindcss/browser@4"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600..900&family=IBM+Plex+Mono:wght@500;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+
+<style>
+  :root{
+    --bg:#0d1424;
+    --bg-deep:#090e1a;
+    --surface:#141d38;
+    --surface-2:#1b2748;
+    --border-soft:#212e54;
+    --ink:#eef1fb;
+    --muted:#8f9bc2;
+    --muted-2:#6a76a0;
+    --amber:#f2a93b;
+    --amber-ink:#3a2a0d;
+    --teal:#45c1a8;
+    --red:#e8564f;
+    --blue:#5b8def;
+    --radius:16px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(1100px 600px at 8% -10%, rgba(242,169,59,.08), transparent 60%),
+      radial-gradient(1000px 700px at 100% 0%, rgba(69,193,168,.07), transparent 55%),
+      var(--bg);
+    color:var(--ink);
+    font-family:'Work Sans', sans-serif;
+    min-height:100vh;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3,h4,.font-display{font-family:'Fraunces', serif;}
+  .mono{font-family:'IBM Plex Mono', monospace;}
+  ::selection{background:var(--amber);color:var(--amber-ink);}
+  a{color:inherit;}
+
+  .panel{
+    background:linear-gradient(180deg, var(--surface), var(--bg-deep) 180%);
+    border:1px solid var(--border-soft);
+    border-radius:var(--radius);
+  }
+  .topbar{
+    background:linear-gradient(180deg, #101a34, #0c1428);
+    border-bottom:1px solid var(--border-soft);
+    position:sticky; top:0; z-index:50;
+  }
+  .topbar-accent{
+    height:3px;
+    background:linear-gradient(90deg, var(--amber), var(--teal) 55%, var(--blue));
+    opacity:.85;
+  }
+  .mark{
+    width:44px;height:44px;border-radius:12px;
+    background:radial-gradient(circle at 30% 20%, #1c2a52, #0c1428 75%);
+    border:1px solid var(--border-soft);
+    display:flex;align-items:center;justify-content:center;
+  }
+  .chip{
+    display:inline-flex;align-items:center;gap:.35rem;
+    background:var(--surface-2);
+    border:1px solid var(--border-soft);
+    color:var(--muted);
+    font-size:.7rem;font-weight:600;
+    padding:.2rem .55rem;border-radius:999px;
+    text-transform:uppercase; letter-spacing:.04em;
+  }
+  input, select, textarea{
+    background:var(--surface-2);
+    border:1px solid var(--border-soft);
+    color:var(--ink);
+  }
+  input::placeholder, textarea::placeholder{color:var(--muted-2);}
+  input:focus, select:focus, textarea:focus{
+    outline:none;
+    border-color:var(--amber);
+    box-shadow:0 0 0 3px rgba(242,169,59,.15);
+  }
+  .btn-primary{
+    background:linear-gradient(180deg, #f6bb5c, var(--amber));
+    color:#241a06;
+    font-weight:700;
+    box-shadow:0 8px 20px -8px rgba(242,169,59,.6);
+  }
+  .btn-primary:hover{filter:brightness(1.06);}
+  .btn-primary:active{filter:brightness(.96);}
+  .btn-ghost{
+    background:var(--surface-2);
+    border:1px solid var(--border-soft);
+    color:var(--muted);
+  }
+  .btn-ghost:hover{color:var(--ink); border-color:var(--amber);}
+
+  .checkbox-card{
+    display:flex; align-items:center; gap:.65rem;
+    background:var(--surface-2);
+    border:1px solid var(--border-soft);
+    border-radius:10px; padding:.75rem .9rem;
+    cursor:pointer;
+    transition:border-color .15s;
+  }
+  .checkbox-card:has(input:checked){
+    border-color:var(--red);
+    background:rgba(232,86,79,.12);
+  }
+  .checkbox-card input{ width:18px; height:18px; accent-color:var(--red); cursor:pointer; }
+
+  tbody tr{border-bottom:1px solid var(--border-soft);}
+
+  #toastWrap{position:fixed; right:1rem; bottom:1rem; z-index:100; display:flex; flex-direction:column; gap:.6rem; width:min(360px, calc(100vw - 2rem));}
+  .toast{
+    display:flex; align-items:flex-start; gap:.6rem;
+    background:var(--surface); border:1px solid var(--border-soft);
+    border-left:3px solid var(--blue);
+    border-radius:10px; padding:.75rem .9rem;
+    box-shadow:0 14px 34px -14px rgba(0,0,0,.6);
+    animation:toastIn .25s ease-out;
+    font-size:.85rem;
+  }
+  .toast.success{border-left-color:var(--teal);}
+  .toast.error{border-left-color:var(--red);}
+  @keyframes toastIn{from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);}}
+</style>
+</head>
+
+<body>
+
+  <div id="toastWrap"></div>
+
+  <header class="topbar">
+    <div class="max-w-2xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
+      <div class="flex items-center gap-3">
+        <div class="mark">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+            <path d="M3 16.5 L7 8.5 L17 8.5 L21 16.5" stroke="#f2a93b" stroke-width="1.6" stroke-linejoin="round"/>
+            <circle cx="7.5" cy="17.5" r="1.9" stroke="#eef1fb" stroke-width="1.4"/>
+            <circle cx="16.5" cy="17.5" r="1.9" stroke="#eef1fb" stroke-width="1.4"/>
+            <path d="M9.3 17.5 H14.7" stroke="#eef1fb" stroke-width="1.4"/>
+            <path d="M9.5 8.5 V5.4 H13.2" stroke="#45c1a8" stroke-width="1.4" stroke-linecap="round"/>
+          </svg>
+        </div>
+        <div>
+          <h1 class="text-lg font-bold tracking-tight text-white font-display">Registrar Viagem</h1>
+          <p class="text-[11px] text-[var(--muted)] font-medium mono uppercase tracking-wider">Fiocruz Minas · Transportes</p>
+        </div>
+      </div>
+      <a href="index.html" class="btn-ghost px-3 py-2 rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap">
+        <i class="fa-solid fa-chart-line mr-1"></i> Painel completo
+      </a>
+    </div>
+    <div class="topbar-accent"></div>
+  </header>
+
+  <main class="max-w-2xl mx-auto px-4 py-6 space-y-5">
+
+    <div class="panel p-5">
+      <div class="flex items-center gap-2 mb-4 border-b border-[var(--border-soft)] pb-3">
+        <i class="fa-solid fa-pen-to-square text-[var(--amber)] text-lg"></i>
+        <h4 id="tituloFormulario" class="text-base font-bold text-white font-display">Registrar nova viagem</h4>
+      </div>
+
+      <form id="formViagem" onsubmit="salvarDadosFormulario(event)" class="space-y-4">
+        <input type="hidden" id="formId">
+
+        <div>
+          <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Data da viagem</label>
+          <input type="date" id="formData" required class="w-full rounded-lg px-3 py-2 text-sm">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Motorista</label>
+            <input type="text" id="formMotorista" required placeholder="Ex: MAGNO" class="w-full rounded-lg px-3 py-2 text-sm uppercase">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Veículo</label>
+            <input type="text" id="formVeiculo" required placeholder="Ex: PICAPE" class="w-full rounded-lg px-3 py-2 text-sm uppercase">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Origem</label>
+            <input type="text" id="formOrigem" required placeholder="Ex: Sede" class="w-full rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Destino</label>
+            <input type="text" id="formDestino" required placeholder="Ex: Fiocruz" class="w-full rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Km inicial</label>
+            <input type="number" id="formKmInicial" required placeholder="0" class="w-full rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Km final</label>
+            <input type="number" id="formKmFinal" required placeholder="0" class="w-full rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+
+        <p id="previewKmRodado" class="text-xs text-[var(--muted)] mono -mt-2">Km rodado nesta viagem: <span class="text-white font-semibold">0 km</span></p>
+
+        <div>
+          <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Observação <span class="normal-case text-[var(--muted-2)] font-normal">(opcional)</span></label>
+          <textarea id="formObservacao" rows="2" placeholder="Ex: Levou equipamento, aguardou no local, etc."
+            class="w-full rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+        </div>
+
+        <label class="checkbox-card">
+          <input type="checkbox" id="formManutencao">
+          <span class="text-sm font-medium"><i class="fa-solid fa-screwdriver-wrench text-[var(--red)] mr-1"></i> Houve manutenção nesta viagem</span>
+        </label>
+
+        <div class="pt-2 flex gap-2">
+          <button type="submit" id="btnSalvar" class="btn-primary flex-1 py-2.5 rounded-lg text-sm transition-all cursor-pointer">
+            <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar registro
+          </button>
+          <button type="button" id="btnCancelarEdicao" onclick="limparFormulario()" class="hidden btn-ghost px-3 py-2.5 rounded-lg text-sm cursor-pointer">
+            Cancelar
+          </button>
+        </div>
+      </form>
+    </div>
+
+    <div class="panel p-5">
+      <div class="flex items-center justify-between mb-3">
+        <h4 class="text-sm font-bold text-white font-display"><i class="fa-solid fa-clock-rotate-left text-[var(--amber)] mr-2"></i>Últimos lançamentos</h4>
+        <span id="statusSync" class="text-[11px] text-[var(--muted-2)] mono">—</span>
+      </div>
+      <div id="ultimosLancamentos" class="space-y-2">
+        <p class="text-xs text-[var(--muted)] py-2">Carregando...</p>
+      </div>
+    </div>
+
+    <p class="text-center text-[11px] text-[var(--muted-2)] mono pb-4">Fiocruz Minas · Dados armazenados em planilha Google Sheets via Apps Script</p>
+  </main>
+
+<script>
+  const API_URL = "https://script.google.com/macros/s/AKfycbzsV7Yh-YVLdQR4gA4xeJaYH9kHJ5-l2Wsn2VjUcvFgsh7H_qhQlNjx4c9OWSUldxG3/exec";
+  let dadosGlobais = { statusMotoristas: [], viagens: [] };
+
+  document.addEventListener("DOMContentLoaded", () => {
+    document.getElementById('formData').valueAsDate = new Date();
+    ['formKmInicial', 'formKmFinal'].forEach(id =>
+      document.getElementById(id).addEventListener('input', atualizarPreviewKm)
+    );
+    carregarDados();
+  });
+
+  function atualizarPreviewKm() {
+    const ini = Number(document.getElementById('formKmInicial').value) || 0;
+    const fim = Number(document.getElementById('formKmFinal').value) || 0;
+    const km = Math.max(0, fim - ini);
+    document.getElementById('previewKmRodado').innerHTML =
+      `Km rodado nesta viagem: <span class="text-white font-semibold">${km.toLocaleString('pt-BR')} km</span> ${km > 600 ? '<span class=\"text-[var(--amber)]\">(folga de 2 dias)</span>' : (fim > 0 ? '<span class=\"text-[var(--teal)]\">(folga de 1 dia)</span>' : '')}`;
+  }
+
+  function showToast(msg, type = "info", ms = 4200) {
+    const wrap = document.getElementById('toastWrap');
+    const icons = { success: 'fa-circle-check', error: 'fa-triangle-exclamation', info: 'fa-circle-info' };
+    const el = document.createElement('div');
+    el.className = `toast ${type}`;
+    el.innerHTML = `<i class="fa-solid ${icons[type] || icons.info} mt-0.5"></i><span>${msg}</span>`;
+    wrap.appendChild(el);
+    setTimeout(() => { el.style.opacity = '0'; el.style.transition = 'opacity .3s'; setTimeout(() => el.remove(), 300); }, ms);
+  }
+
+  async function carregarDados(tentativaInterna = false) {
+    try {
+      const url = API_URL + "?_nocache=" + new Date().getTime();
+      const response = await fetch(url, { method: 'GET', redirect: 'follow' });
+      if (!response.ok) throw new Error("HTTP " + response.status);
+
+      const texto = await response.text();
+      const resJson = JSON.parse(texto);
+
+      if (resJson.sucesso) {
+        dadosGlobais = resJson;
+        renderizarUltimosLancamentos();
+        document.getElementById('statusSync').textContent = "Atualizado às " + new Date().toLocaleTimeString('pt-BR');
+
+        const params = new URLSearchParams(window.location.search);
+        const idEdicao = params.get('id');
+        if (idEdicao) prepararEdicao(idEdicao);
+      } else {
+        showToast(resJson.erro || "Erro ao carregar dados da planilha.", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      if (!tentativaInterna) { setTimeout(() => carregarDados(true), 1500); return; }
+      showToast("Não foi possível conectar à planilha. Verifique a implantação do Apps Script.", "error");
+    }
+  }
+
+  function renderizarUltimosLancamentos() {
+    const wrap = document.getElementById('ultimosLancamentos');
+    const ultimos = dadosGlobais.viagens.slice(0, 5);
+
+    if (!ultimos.length) {
+      wrap.innerHTML = `<p class="text-xs text-[var(--muted)] py-2">Nenhuma viagem registrada ainda.</p>`;
+      return;
+    }
+
+    wrap.innerHTML = "";
+    ultimos.forEach(v => {
+      const dataFmt = new Date(v.data).toLocaleDateString('pt-BR', { timeZone: 'UTC' });
+      wrap.innerHTML += `
+        <div class="flex items-center justify-between text-xs border-b border-[var(--border-soft)] pb-2 last:border-0 last:pb-0">
+          <div>
+            <span class="font-bold text-[var(--amber)]">${v.motorista}</span>
+            <span class="text-[var(--muted)]"> · ${v.origem} → ${v.destino}</span>
+          </div>
+          <div class="flex items-center gap-2 mono text-[var(--muted)] shrink-0">
+            <span>${dataFmt}</span>
+            <span class="text-white font-semibold">${formatarNumero(v.kmRodado)} km</span>
+          </div>
+        </div>
+      `;
+    });
+  }
+
+  function formatarNumero(n) { return Math.round(n).toLocaleString('pt-BR'); }
+
+  function prepararEdicao(id) {
+    const v = dadosGlobais.viagens.find(x => x.id === id);
+    if (!v) { showToast("Registro não encontrado para edição.", "error"); return; }
+
+    document.getElementById('formId').value = v.id;
+    document.getElementById('formData').value = v.data.substring(0, 10);
+    document.getElementById('formMotorista').value = v.motorista;
+    document.getElementById('formVeiculo').value = v.veiculo;
+    document.getElementById('formOrigem').value = v.origem;
+    document.getElementById('formKmInicial').value = v.kmInicial;
+    document.getElementById('formDestino').value = v.destino;
+    document.getElementById('formKmFinal').value = v.kmFinal;
+    document.getElementById('formObservacao').value = v.observacao || "";
+    document.getElementById('formManutencao').checked = Number(v.manutencao) > 0;
+    atualizarPreviewKm();
+
+    document.getElementById('tituloFormulario').textContent = "Editar viagem selecionada";
+    document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-pen-to-square mr-1"></i> Atualizar registro';
+    document.getElementById('btnCancelarEdicao').classList.remove('hidden');
+    document.getElementById('formViagem').scrollIntoView({ behavior: 'smooth' });
+  }
+
+  function limparFormulario() {
+    document.getElementById('formId').value = "";
+    document.getElementById('formViagem').reset();
+    document.getElementById('formData').valueAsDate = new Date();
+    atualizarPreviewKm();
+
+    document.getElementById('tituloFormulario').textContent = "Registrar nova viagem";
+    document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Salvar registro';
+    document.getElementById('btnCancelarEdicao').classList.add('hidden');
+
+    if (window.location.search) {
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }
+
+  async function salvarDadosFormulario(event) {
+    event.preventDefault();
+    const btn = document.getElementById('btnSalvar');
+    const originalHtml = btn.innerHTML;
+
+    const id = document.getElementById('formId').value;
+    const acao = id ? "editarViagem" : "salvarViagem";
+
+    const payload = {
+      id: id,
+      acao: acao,
+      data: document.getElementById('formData').value,
+      motorista: document.getElementById('formMotorista').value.toUpperCase().trim(),
+      veiculo: document.getElementById('formVeiculo').value.toUpperCase().trim(),
+      origem: document.getElementById('formOrigem').value.trim(),
+      destino: document.getElementById('formDestino').value.trim(),
+      kmInicial: Number(document.getElementById('formKmInicial').value),
+      kmFinal: Number(document.getElementById('formKmFinal').value),
+      observacao: document.getElementById('formObservacao').value.trim(),
+      manutencao: document.getElementById('formManutencao').checked ? 1 : 0
+    };
+
+    if (payload.kmFinal < payload.kmInicial) {
+      showToast("O km final não pode ser menor que o km inicial.", "error");
+      return;
+    }
+
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Gravando...';
+
+    try {
+      await fetch(API_URL, {
+        method: 'POST',
+        mode: 'no-cors', // necessário pois o Apps Script não envia cabeçalhos CORS no POST
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload)
+      });
+
+      showToast(id ? "Registro atualizado com sucesso." : "Viagem registrada com sucesso.", "success");
+      limparFormulario();
+      setTimeout(carregarDados, 3000);
+    } catch (err) {
+      console.error(err);
+      showToast("Ocorreu um problema ao salvar as informações.", "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalHtml;
+    }
+  }
+</script>
+</body>
+</html>
