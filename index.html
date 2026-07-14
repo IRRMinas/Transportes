@@ -264,9 +264,15 @@
         </div>
       </div>
 
-      <div class="flex items-center gap-2 w-full sm:w-auto">
+      <div class="flex items-center gap-2 w-full sm:w-auto flex-wrap">
+        <input type="month" id="filtroMes" onchange="renderizarDashboard()"
+          class="rounded-lg px-3 py-2 text-sm font-medium cursor-pointer">
+        <button onclick="document.getElementById('filtroMes').value=''; renderizarDashboard();"
+          class="btn-ghost px-3 py-2 rounded-lg text-xs font-semibold shrink-0" title="Ver todo o histórico, sem filtrar por mês">
+          Ver tudo
+        </button>
         <select id="filtroMotorista" onchange="renderizarDashboard()"
-          class="w-full sm:w-52 rounded-lg px-3 py-2 text-sm font-medium cursor-pointer">
+          class="w-full sm:w-44 rounded-lg px-3 py-2 text-sm font-medium cursor-pointer">
           <option value="GERAL">Todos os motoristas</option>
         </select>
         <button onclick="carregarDados()"
@@ -274,12 +280,22 @@
           title="Atualizar dados">
           <i id="btnRecarregarIcon" class="fa-solid fa-arrow-rotate-right"></i>
         </button>
+        <a href="cadastro.html"
+          class="btn-primary px-3 py-2.5 rounded-lg text-sm transition-all cursor-pointer shrink-0 whitespace-nowrap">
+          <i class="fa-solid fa-plus mr-1"></i> Registrar viagem
+        </a>
       </div>
     </div>
     <div class="topbar-accent"></div>
   </header>
 
   <main class="max-w-7xl mx-auto px-4 py-6 space-y-6">
+
+    <!-- ================= PERÍODO SELECIONADO ================= -->
+    <div class="flex items-center gap-2 text-xs text-[var(--muted)]">
+      <i class="fa-regular fa-calendar text-[var(--amber)]"></i>
+      Exibindo dados de: <span id="periodoLabel" class="chip">—</span>
+    </div>
 
     <!-- ================= ERRO DE CONEXÃO ================= -->
     <div id="bannerErro" class="hidden alert-sign rounded-2xl p-4 flex items-start gap-3">
@@ -342,74 +358,49 @@
       </div>
     </div>
 
-    <!-- ================= FORMULÁRIO + TABELA ================= -->
-    <div class="grid grid-cols-1 lg:grid-cols-3 gap-5 items-start">
+    <!-- ================= FOLGAS & MANUTENÇÃO ================= -->
+    <div class="panel p-5">
+      <h4 class="text-base font-bold text-white mb-4 font-display"><i class="fa-solid fa-umbrella-beach text-[var(--amber)] mr-2"></i>Folgas & manutenção</h4>
 
-      <div class="panel p-5 sticky top-24">
-        <div class="flex items-center gap-2 mb-4 border-b border-[var(--border-soft)] pb-3">
-          <i class="fa-solid fa-pen-to-square text-[var(--amber)] text-lg"></i>
-          <h4 id="tituloFormulario" class="text-base font-bold text-white font-display">Registrar nova viagem</h4>
+      <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 mb-5">
+        <div class="display">
+          <p class="text-[11px] uppercase tracking-wider text-[var(--muted)] mb-2">Folgas de 1 dia</p>
+          <span id="kpiFolga1" class="digits text-2xl">0</span>
         </div>
-
-        <form id="formViagem" onsubmit="salvarDadosFormulario(event)" class="space-y-4">
-          <input type="hidden" id="formId">
-
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Data da viagem</label>
-            <input type="date" id="formData" required class="w-full rounded-lg px-3 py-2 text-sm">
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Motorista</label>
-              <input type="text" id="formMotorista" required placeholder="Ex: MAGNO" class="w-full rounded-lg px-3 py-2 text-sm uppercase">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Veículo</label>
-              <input type="text" id="formVeiculo" required placeholder="Ex: PICAPE" class="w-full rounded-lg px-3 py-2 text-sm uppercase">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Origem</label>
-              <input type="text" id="formOrigem" required placeholder="Ex: Sede" class="w-full rounded-lg px-3 py-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Destino</label>
-              <input type="text" id="formDestino" required placeholder="Ex: Fiocruz" class="w-full rounded-lg px-3 py-2 text-sm">
-            </div>
-          </div>
-
-          <div class="grid grid-cols-2 gap-3">
-            <div>
-              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Km inicial</label>
-              <input type="number" id="formKmInicial" required placeholder="0" class="w-full rounded-lg px-3 py-2 text-sm">
-            </div>
-            <div>
-              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Km final</label>
-              <input type="number" id="formKmFinal" required placeholder="0" class="w-full rounded-lg px-3 py-2 text-sm">
-            </div>
-          </div>
-
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Observação <span class="normal-case text-[var(--muted-2)] font-normal">(opcional)</span></label>
-            <textarea id="formObservacao" rows="2" placeholder="Ex: Levou equipamento, aguardou no local, etc."
-              class="w-full rounded-lg px-3 py-2 text-sm resize-none"></textarea>
-          </div>
-
-          <div class="pt-2 flex gap-2">
-            <button type="submit" id="btnSalvar" class="btn-primary flex-1 py-2.5 rounded-lg text-sm transition-all cursor-pointer">
-              <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar registro
-            </button>
-            <button type="button" id="btnCancelarEdicao" onclick="limparFormulario()" class="hidden btn-ghost px-3 py-2.5 rounded-lg text-sm cursor-pointer">
-              Cancelar
-            </button>
-          </div>
-        </form>
+        <div class="display teal">
+          <p class="text-[11px] uppercase tracking-wider text-[var(--muted)] mb-2">Folgas de 2 dias</p>
+          <span id="kpiFolga2" class="digits text-2xl">0</span>
+        </div>
+        <div class="display">
+          <p class="text-[11px] uppercase tracking-wider text-[var(--muted)] mb-2">Total de dias de folga</p>
+          <span id="kpiDiasFolga" class="digits text-2xl">0</span>
+        </div>
+        <div class="display" style="border-color:rgba(232,86,79,.4)">
+          <p class="text-[11px] uppercase tracking-wider text-[var(--muted)] mb-2">Manutenções</p>
+          <span id="kpiManutencoes" class="digits text-2xl" style="color:var(--red); text-shadow:0 0 14px rgba(232,86,79,.4)">0</span>
+        </div>
       </div>
 
-      <div class="panel lg:col-span-2 overflow-hidden">
+      <div class="overflow-x-auto scrollbar-thin">
+        <table class="w-full border-collapse text-left text-sm">
+          <thead>
+            <tr class="border-b border-[var(--border-soft)] bg-black/10 text-[var(--muted)] font-semibold uppercase text-[11px]">
+              <th class="px-4 py-3">Motorista</th>
+              <th class="px-4 py-3 text-right">Folgas 1 dia</th>
+              <th class="px-4 py-3 text-right">Folgas 2 dias</th>
+              <th class="px-4 py-3 text-right">Dias de folga</th>
+              <th class="px-4 py-3 text-right">Manutenções</th>
+            </tr>
+          </thead>
+          <tbody id="tabelaFolgasBody">
+            <tr><td colspan="5" class="px-4 py-6 text-center text-[var(--muted)]">Sem dados para o período selecionado.</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ================= TABELA ================= -->
+    <div class="panel overflow-hidden">
         <div class="p-5 border-b border-[var(--border-soft)] flex justify-between items-center">
           <h4 class="text-base font-bold text-white font-display"><i class="fa-solid fa-list-check text-[var(--amber)] mr-2"></i>Histórico completo</h4>
           <span id="contadorRegistros" class="chip">0 registros</span>
@@ -434,8 +425,6 @@
             </tbody>
           </table>
         </div>
-      </div>
-
     </div>
 
     <p class="text-center text-[11px] text-[var(--muted-2)] mono pb-4">Fiocruz Minas · Dados armazenados em planilha Google Sheets via Apps Script</p>
@@ -449,7 +438,9 @@
   let chartDestinosObj = null;
 
   document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById('formData').valueAsDate = new Date();
+    const hoje = new Date();
+    const mesAtual = hoje.getFullYear() + "-" + String(hoje.getMonth() + 1).padStart(2, '0');
+    document.getElementById('filtroMes').value = mesAtual;
     carregarDados();
   });
 
@@ -560,23 +551,53 @@
     return entradas[0][0];
   }
 
+  // ---------- Período (filtro de mês) ----------
+  function dentroDoPeriodo(dataStr, mesSelecionado) {
+    if (!mesSelecionado) return true; // "Ver tudo" -> sem filtro de período
+    const d = new Date(dataStr);
+    const ym = d.getUTCFullYear() + "-" + String(d.getUTCMonth() + 1).padStart(2, '0');
+    return ym === mesSelecionado;
+  }
+
+  function kmRodadoNoPeriodo(motorista, mesSelecionado) {
+    return dadosGlobais.viagens
+      .filter(v => v.motorista === motorista && dentroDoPeriodo(v.data, mesSelecionado))
+      .reduce((acc, v) => acc + v.kmRodado, 0);
+  }
+
+  function formatarMesLabel(mesSelecionado) {
+    if (!mesSelecionado) return "Todo o histórico";
+    const [ano, mes] = mesSelecionado.split('-');
+    const nomes = ["Janeiro", "Fevereiro", "Março", "Abril", "Maio", "Junho", "Julho", "Agosto", "Setembro", "Outubro", "Novembro", "Dezembro"];
+    return nomes[parseInt(mes, 10) - 1] + " de " + ano;
+  }
+
   function renderizarDashboard() {
     const motoristaSelecionado = document.getElementById('filtroMotorista').value;
+    const mesSelecionado = document.getElementById('filtroMes').value;
 
-    const viagensFiltradas = motoristaSelecionado === "GERAL"
-      ? dadosGlobais.viagens
-      : dadosGlobais.viagens.filter(v => v.motorista === motoristaSelecionado);
+    document.getElementById('periodoLabel').textContent = formatarMesLabel(mesSelecionado);
 
-    // 1. ALERTAS
+    const viagensFiltradas = dadosGlobais.viagens.filter(v =>
+      (motoristaSelecionado === "GERAL" || v.motorista === motoristaSelecionado) &&
+      dentroDoPeriodo(v.data, mesSelecionado)
+    );
+
+    // 1. ALERTAS (com base no km rodado dentro do mês selecionado)
     const containerAlertas = document.getElementById('containerAlertas');
     containerAlertas.innerHTML = "";
     let temAlertaAtivo = false;
 
-    dadosGlobais.statusMotoristas.forEach(m => {
-      if (motoristaSelecionado === "GERAL" || m.motorista === motoristaSelecionado) {
-        if (m.atingiuAlerta) {
+    if (mesSelecionado) {
+      dadosGlobais.statusMotoristas.forEach(m => {
+        if (motoristaSelecionado !== "GERAL" && m.motorista !== motoristaSelecionado) return;
+
+        const kmPeriodo = kmRodadoNoPeriodo(m.motorista, mesSelecionado);
+        const atingiu = m.kmAlerta > 0 && kmPeriodo >= m.kmAlerta;
+
+        if (atingiu) {
           temAlertaAtivo = true;
-          const excesso = Math.abs(m.diferencaAlerta);
+          const excesso = kmPeriodo - m.kmAlerta;
           containerAlertas.innerHTML += `
             <div class="alert-sign rounded-2xl p-4 flex items-center justify-between gap-3 rise">
               <div class="flex items-center gap-3">
@@ -585,15 +606,15 @@
                 </div>
                 <div>
                   <h5 class="font-bold text-white text-sm">Manutenção necessária — ${m.motorista} (${m.veiculo})</h5>
-                  <p class="text-xs text-[var(--muted)]">Veículo alcançou ${formatarNumero(m.ultimoKm)} km, acima do limite de ${formatarNumero(m.kmAlerta)} km.</p>
+                  <p class="text-xs text-[var(--muted)]">Rodou ${formatarNumero(kmPeriodo)} km em ${formatarMesLabel(mesSelecionado)}, acima do limite mensal de ${formatarNumero(m.kmAlerta)} km.</p>
                 </div>
               </div>
               <span class="bg-[var(--red)] text-[#1c0a08] font-black px-3 py-1 rounded-lg text-xs mono shrink-0">+${formatarNumero(excesso)} KM</span>
             </div>
           `;
         }
-      }
-    });
+      });
+    }
     containerAlertas.classList.toggle('hidden', !temAlertaAtivo);
 
     // 2. CLUSTER (KPIs)
@@ -637,10 +658,12 @@
       frotaWrap.innerHTML = `<p class="text-sm text-[var(--muted)] py-6">Nenhum motorista cadastrado na aba "Configuracoes".</p>`;
     } else {
       listaFrota.forEach(m => {
-        const pct = m.kmAlerta > 0 ? Math.min(100, (m.ultimoKm / m.kmAlerta) * 100) : 0;
+        const kmPeriodo = kmRodadoNoPeriodo(m.motorista, mesSelecionado);
+        const pct = m.kmAlerta > 0 ? Math.min(100, (kmPeriodo / m.kmAlerta) * 100) : 0;
         const cor = pct >= 100 ? 'var(--red)' : (pct >= 75 ? 'var(--amber)' : 'var(--teal)');
         const top = destinoTop(m.lugaresVisitados);
-        const atingiu = !!m.atingiuAlerta;
+        // Só sinaliza alerta vermelho piscando quando um mês específico está selecionado
+        const atingiu = !!mesSelecionado && m.kmAlerta > 0 && kmPeriodo >= m.kmAlerta;
         frotaWrap.innerHTML += `
           <div class="panel p-4 w-64 shrink-0 rise ${atingiu ? 'card-limite' : ''}">
             <div class="flex justify-between items-start mb-2">
@@ -656,7 +679,7 @@
               <div class="gauge-fill" style="width:${pct}%; background:${cor};"></div>
             </div>
             <div class="flex justify-between text-[11px] text-[var(--muted)] mono mb-2">
-              <span>${formatarNumero(m.ultimoKm)} km</span>
+              <span>${formatarNumero(kmPeriodo)} km</span>
               <span>limite ${formatarNumero(m.kmAlerta)} km</span>
             </div>
             ${atingiu
@@ -703,7 +726,54 @@
       });
     }
 
+    renderizarFolgasManutencao(viagensFiltradas);
     processarERenderizarGraficos(viagensFiltradas);
+  }
+
+  function renderizarFolgasManutencao(viagens) {
+    let totalFolga1 = 0, totalFolga2 = 0, totalManutencao = 0;
+    const porMotorista = {};
+
+    viagens.forEach(v => {
+      const f1 = Number(v.folga1Dia) || 0;
+      const f2 = Number(v.folga2Dias) || 0;
+      const mnt = Number(v.manutencao) || 0;
+      totalFolga1 += f1;
+      totalFolga2 += f2;
+      totalManutencao += mnt;
+
+      if (!porMotorista[v.motorista]) porMotorista[v.motorista] = { folga1: 0, folga2: 0, manutencao: 0 };
+      porMotorista[v.motorista].folga1 += f1;
+      porMotorista[v.motorista].folga2 += f2;
+      porMotorista[v.motorista].manutencao += mnt;
+    });
+
+    document.getElementById('kpiFolga1').textContent = formatarNumero(totalFolga1);
+    document.getElementById('kpiFolga2').textContent = formatarNumero(totalFolga2);
+    document.getElementById('kpiDiasFolga').textContent = formatarNumero(totalFolga1 + (totalFolga2 * 2));
+    document.getElementById('kpiManutencoes').textContent = formatarNumero(totalManutencao);
+
+    const tbody = document.getElementById('tabelaFolgasBody');
+    const nomes = Object.keys(porMotorista).sort();
+
+    if (!nomes.length) {
+      tbody.innerHTML = `<tr><td colspan="5" class="px-4 py-6 text-center text-[var(--muted)]">Sem dados para o período selecionado.</td></tr>`;
+      return;
+    }
+
+    tbody.innerHTML = "";
+    nomes.forEach(nome => {
+      const d = porMotorista[nome];
+      tbody.innerHTML += `
+        <tr>
+          <td class="px-4 py-2.5 font-semibold text-white text-xs">${nome}</td>
+          <td class="px-4 py-2.5 text-right mono text-xs">${formatarNumero(d.folga1)}</td>
+          <td class="px-4 py-2.5 text-right mono text-xs">${formatarNumero(d.folga2)}</td>
+          <td class="px-4 py-2.5 text-right mono text-xs font-bold text-[var(--amber)]">${formatarNumero(d.folga1 + d.folga2 * 2)}</td>
+          <td class="px-4 py-2.5 text-right mono text-xs ${d.manutencao > 0 ? 'text-[var(--red)] font-bold' : ''}">${formatarNumero(d.manutencao)}</td>
+        </tr>
+      `;
+    });
   }
 
   function processarERenderizarGraficos(viagens) {
@@ -764,83 +834,7 @@
   }
 
   function prepararEdicao(id) {
-    const v = dadosGlobais.viagens.find(x => x.id === id);
-    if (!v) return;
-
-    document.getElementById('formId').value = v.id;
-    document.getElementById('formData').value = v.data.substring(0, 10);
-    document.getElementById('formMotorista').value = v.motorista;
-    document.getElementById('formVeiculo').value = v.veiculo;
-    document.getElementById('formOrigem').value = v.origem;
-    document.getElementById('formKmInicial').value = v.kmInicial;
-    document.getElementById('formDestino').value = v.destino;
-    document.getElementById('formKmFinal').value = v.kmFinal;
-    document.getElementById('formObservacao').value = v.observacao || "";
-
-    document.getElementById('tituloFormulario').textContent = "Editar viagem selecionada";
-    document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-pen-to-square mr-1"></i> Atualizar registro';
-    document.getElementById('btnCancelarEdicao').classList.remove('hidden');
-
-    document.getElementById('formViagem').scrollIntoView({ behavior: 'smooth' });
-  }
-
-  function limparFormulario() {
-    document.getElementById('formId').value = "";
-    document.getElementById('formViagem').reset();
-    document.getElementById('formData').valueAsDate = new Date();
-
-    document.getElementById('tituloFormulario').textContent = "Registrar nova viagem";
-    document.getElementById('btnSalvar').innerHTML = '<i class="fa-solid fa-floppy-disk mr-1"></i> Salvar registro';
-    document.getElementById('btnCancelarEdicao').classList.add('hidden');
-  }
-
-  async function salvarDadosFormulario(event) {
-    event.preventDefault();
-    const btn = document.getElementById('btnSalvar');
-    const originalHtml = btn.innerHTML;
-
-    const id = document.getElementById('formId').value;
-    const acao = id ? "editarViagem" : "salvarViagem";
-
-    const payload = {
-      id: id,
-      acao: acao,
-      data: document.getElementById('formData').value,
-      motorista: document.getElementById('formMotorista').value.toUpperCase().trim(),
-      veiculo: document.getElementById('formVeiculo').value.toUpperCase().trim(),
-      origem: document.getElementById('formOrigem').value.trim(),
-      destino: document.getElementById('formDestino').value.trim(),
-      kmInicial: Number(document.getElementById('formKmInicial').value),
-      kmFinal: Number(document.getElementById('formKmFinal').value),
-      observacao: document.getElementById('formObservacao').value.trim()
-    };
-
-    if (payload.kmFinal < payload.kmInicial) {
-      showToast("O km final não pode ser menor que o km inicial.", "error");
-      return;
-    }
-
-    btn.disabled = true;
-    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Gravando...';
-
-    try {
-      await fetch(API_URL, {
-        method: 'POST',
-        mode: 'no-cors', // necessário pois o Apps Script não envia cabeçalhos CORS no POST
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload)
-      });
-
-      showToast(id ? "Registro atualizado com sucesso." : "Viagem registrada com sucesso.", "success");
-      limparFormulario();
-      setTimeout(carregarDados, 3000);
-    } catch (err) {
-      console.error(err);
-      showToast("Ocorreu um problema ao salvar as informações.", "error");
-    } finally {
-      btn.disabled = false;
-      btn.innerHTML = originalHtml;
-    }
+    window.location.href = 'cadastro.html?id=' + encodeURIComponent(id);
   }
 </script>
 </body>
