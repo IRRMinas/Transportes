@@ -213,6 +213,17 @@
 
         <p id="previewKmRodado" class="text-xs text-[var(--muted)] mono -mt-2">Km rodado nesta viagem: <span class="text-white font-semibold">0 km</span></p>
 
+        <div class="grid grid-cols-2 gap-3 p-3 bg-black/15 rounded-xl border border-[var(--border-soft)]">
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--teal)] uppercase tracking-wider mb-1">Folga até 600 (1 Dia)</label>
+            <input type="number" id="formFolga1Dia" min="0" value="0" class="w-full rounded-lg px-3 py-2 text-sm">
+          </div>
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--amber)] uppercase tracking-wider mb-1">Folga mais de 600 (2 Dias)</label>
+            <input type="number" id="formFolga2Dias" min="0" value="0" class="w-full rounded-lg px-3 py-2 text-sm">
+          </div>
+        </div>
+
         <div>
           <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Observação <span class="normal-case text-[var(--muted-2)] font-normal">(opcional)</span></label>
           <textarea id="formObservacao" rows="2" placeholder="Ex: Levou equipamento, aguardou no local, etc."
@@ -265,7 +276,7 @@
     const fim = Number(document.getElementById('formKmFinal').value) || 0;
     const km = Math.max(0, fim - ini);
     document.getElementById('previewKmRodado').innerHTML =
-      `Km rodado nesta viagem: <span class="text-white font-semibold">${km.toLocaleString('pt-BR')} km</span> ${km > 600 ? '<span class=\"text-[var(--amber)]\">(folga de 2 dias)</span>' : (fim > 0 ? '<span class=\"text-[var(--teal)]\">(folga de 1 dia)</span>' : '')}`;
+      `Km rodado nesta viagem: <span class="text-white font-semibold">${km.toLocaleString('pt-BR')} km</span>`;
   }
 
   function showToast(msg, type = "info", ms = 4200) {
@@ -346,6 +357,8 @@
     document.getElementById('formKmInicial').value = v.kmInicial;
     document.getElementById('formDestino').value = v.destino;
     document.getElementById('formKmFinal').value = v.kmFinal;
+    document.getElementById('formFolga1Dia').value = Number(v.folga1Dia) || 0;
+    document.getElementById('formFolga2Dias').value = Number(v.folga2Dias) || 0;
     document.getElementById('formObservacao').value = v.observacao || "";
     document.getElementById('formManutencao').checked = Number(v.manutencao) > 0;
     atualizarPreviewKm();
@@ -360,6 +373,8 @@
     document.getElementById('formId').value = "";
     document.getElementById('formViagem').reset();
     document.getElementById('formData').valueAsDate = new Date();
+    document.getElementById('formFolga1Dia').value = 0;
+    document.getElementById('formFolga2Dias').value = 0;
     atualizarPreviewKm();
 
     document.getElementById('tituloFormulario').textContent = "Registrar nova viagem";
@@ -389,6 +404,8 @@
       destino: document.getElementById('formDestino').value.trim(),
       kmInicial: Number(document.getElementById('formKmInicial').value),
       kmFinal: Number(document.getElementById('formKmFinal').value),
+      folga1Dia: Number(document.getElementById('formFolga1Dia').value),
+      folga2Dias: Number(document.getElementById('formFolga2Dias').value),
       observacao: document.getElementById('formObservacao').value.trim(),
       manutencao: document.getElementById('formManutencao').checked ? 1 : 0
     };
@@ -404,7 +421,7 @@
     try {
       await fetch(API_URL, {
         method: 'POST',
-        mode: 'no-cors', // necessário pois o Apps Script não envia cabeçalhos CORS no POST
+        mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)
       });
