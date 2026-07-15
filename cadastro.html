@@ -138,139 +138,271 @@
 
   <div id="toastWrap"></div>
 
-  <header class="topbar">
-    <div class="max-w-2xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
-      <div class="flex items-center gap-3">
-        <div class="mark">
+  <div id="telaLogin" class="flex items-center justify-center min-h-vh p-4 bg-slate-950/20 backdrop-blur-md">
+    <div class="panel p-6 w-full max-w-sm space-y-5">
+      <div class="text-center space-y-2">
+        <div class="mark mx-auto">
           <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
-            <path d="M3 16.5 L7 8.5 L17 8.5 L21 16.5" stroke="#f2a93b" stroke-width="1.6" stroke-linejoin="round"/>
-            <circle cx="7.5" cy="17.5" r="1.9" stroke="#eef1fb" stroke-width="1.4"/>
-            <circle cx="16.5" cy="17.5" r="1.9" stroke="#eef1fb" stroke-width="1.4"/>
-            <path d="M9.3 17.5 H14.7" stroke="#eef1fb" stroke-width="1.4"/>
-            <path d="M9.5 8.5 V5.4 H13.2" stroke="#45c1a8" stroke-width="1.4" stroke-linecap="round"/>
+            <path d="M12 21 C16.97 21 21 16.97 21 12 C21 7.03 16.97 3 12 3 C7.03 3 3 7.03 3 12" stroke="#f2a93b" stroke-width="1.6" stroke-linejoin="round"/>
+            <path d="M12 7 V12 L15 15" stroke="#eef1fb" stroke-width="1.4" stroke-linecap="round"/>
           </svg>
         </div>
-        <div>
-          <h1 class="text-lg font-bold tracking-tight text-white font-display">Registrar Viagem</h1>
-          <p class="text-[11px] text-[var(--muted)] font-medium mono uppercase tracking-wider">Fiocruz Minas · Transportes</p>
-        </div>
-      </div>
-      <a href="index.html" class="btn-ghost px-3 py-2 rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap">
-        <i class="fa-solid fa-chart-line mr-1"></i> Painel completo
-      </a>
-    </div>
-    <div class="topbar-accent"></div>
-  </header>
-
-  <main class="max-w-2xl mx-auto px-4 py-6 space-y-5">
-
-    <div class="panel p-5">
-      <div class="flex items-center gap-2 mb-4 border-b border-[var(--border-soft)] pb-3">
-        <i class="fa-solid fa-pen-to-square text-[var(--amber)] text-lg"></i>
-        <h4 id="tituloFormulario" class="text-base font-bold text-white font-display">Registrar nova viagem</h4>
+        <h2 class="text-xl font-bold text-white font-display">Acesso Restrito</h2>
+        <p class="text-xs text-[var(--muted)]">Insira suas credenciais para gerenciar a frota</p>
       </div>
 
-      <form id="formViagem" onsubmit="salvarDadosFormulario(event)" class="space-y-4">
-        <input type="hidden" id="formId">
-
+      <form id="formLogin" onsubmit="realizarLogin(event)" class="space-y-4">
         <div>
-          <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Data da viagem</label>
-          <input type="date" id="formData" required class="w-full rounded-lg px-3 py-2 text-sm">
+          <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Usuário</label>
+          <input type="text" id="loginUsuario" required placeholder="Ex: joao.silva" class="w-full rounded-lg px-3 py-2.5 text-sm lowercase">
         </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Motorista</label>
-            <input type="text" id="formMotorista" required placeholder="Ex: MAGNO" class="w-full rounded-lg px-3 py-2 text-sm uppercase">
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Veículo</label>
-            <input type="text" id="formVeiculo" required placeholder="Ex: PICAPE" class="w-full rounded-lg px-3 py-2 text-sm uppercase">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Origem</label>
-            <input type="text" id="formOrigem" required placeholder="Ex: Sede" class="w-full rounded-lg px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Destino</label>
-            <input type="text" id="formDestino" required placeholder="Ex: Fiocruz" class="w-full rounded-lg px-3 py-2 text-sm">
-          </div>
-        </div>
-
-        <div class="grid grid-cols-2 gap-3">
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Km inicial</label>
-            <input type="number" id="formKmInicial" required placeholder="0" class="w-full rounded-lg px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Km final</label>
-            <input type="number" id="formKmFinal" required placeholder="0" class="w-full rounded-lg px-3 py-2 text-sm">
-          </div>
-        </div>
-
-        <p id="previewKmRodado" class="text-xs text-[var(--muted)] mono -mt-2">Km rodado nesta viagem: <span class="text-white font-semibold">0 km</span></p>
-
-        <div class="grid grid-cols-2 gap-3 p-3 bg-black/15 rounded-xl border border-[var(--border-soft)]">
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--teal)] uppercase tracking-wider mb-1">Folga até 600 (1 Dia)</label>
-            <input type="number" id="formFolga1Dia" min="0" value="0" class="w-full rounded-lg px-3 py-2 text-sm">
-          </div>
-          <div>
-            <label class="block text-[11px] font-semibold text-[var(--amber)] uppercase tracking-wider mb-1">Folga mais de 600 (2 Dias)</label>
-            <input type="number" id="formFolga2Dias" min="0" value="0" class="w-full rounded-lg px-3 py-2 text-sm">
-          </div>
-        </div>
-
         <div>
-          <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Observação <span class="normal-case text-[var(--muted-2)] font-normal">(opcional)</span></label>
-          <textarea id="formObservacao" rows="2" placeholder="Ex: Levou equipamento, aguardou no local, etc."
-            class="w-full rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+          <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Senha</label>
+          <input type="password" id="loginSenha" required placeholder="••••••••" class="w-full rounded-lg px-3 py-2.5 text-sm">
+          <p class="text-[10px] text-[var(--muted-2)] mt-1">Primeiro acesso? Digite o usuário que o administrador te passou e crie sua própria senha aqui — ela será salva automaticamente.</p>
         </div>
-
-        <label class="checkbox-card">
-          <input type="checkbox" id="formManutencao">
-          <span class="text-sm font-medium"><i class="fa-solid fa-screwdriver-wrench text-[var(--red)] mr-1"></i> Houve manutenção nesta viagem</span>
-        </label>
-
-        <div class="pt-2 flex gap-2">
-          <button type="submit" id="btnSalvar" class="btn-primary flex-1 py-2.5 rounded-lg text-sm transition-all cursor-pointer">
-            <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar registro
-          </button>
-          <button type="button" id="btnCancelarEdicao" onclick="limparFormulario()" class="hidden btn-ghost px-3 py-2.5 rounded-lg text-sm cursor-pointer">
-            Cancelar
-          </button>
-        </div>
+        <button type="submit" id="btnLogin" class="btn-primary w-full py-2.5 rounded-lg text-sm transition-all cursor-pointer">
+          <i class="fa-solid fa-right-to-bracket mr-1"></i> Entrar
+        </button>
       </form>
     </div>
+  </div>
 
-    <div class="panel p-5">
-      <div class="flex items-center justify-between mb-3">
-        <h4 class="text-sm font-bold text-white font-display"><i class="fa-solid fa-clock-rotate-left text-[var(--amber)] mr-2"></i>Últimos lançamentos</h4>
-        <span id="statusSync" class="text-[11px] text-[var(--muted-2)] mono">—</span>
+  <div id="conteudoPrincipal" class="hidden">
+    <header class="topbar">
+      <div class="max-w-2xl mx-auto px-4 py-4 flex justify-between items-center gap-4">
+        <div class="flex items-center gap-3">
+          <div class="mark">
+            <svg width="22" height="22" viewBox="0 0 24 24" fill="none">
+              <path d="M3 16.5 L7 8.5 L17 8.5 L21 16.5" stroke="#f2a93b" stroke-width="1.6" stroke-linejoin="round"/>
+              <circle cx="7.5" cy="17.5" r="1.9" stroke="#eef1fb" stroke-width="1.4"/>
+              <circle cx="16.5" cy="17.5" r="1.9" stroke="#eef1fb" stroke-width="1.4"/>
+              <path d="M9.3 17.5 H14.7" stroke="#eef1fb" stroke-width="1.4"/>
+              <path d="M9.5 8.5 V5.4 H13.2" stroke="#45c1a8" stroke-width="1.4" stroke-linecap="round"/>
+            </svg>
+          </div>
+          <div>
+            <h1 class="text-lg font-bold tracking-tight text-white font-display">Registrar Viagem</h1>
+            <p class="text-[11px] text-[var(--muted)] font-medium mono uppercase tracking-wider">Operador: <span id="labelNomeOperador" class="text-[var(--teal)] font-bold">—</span></p>
+          </div>
+        </div>
+        <div class="flex gap-2">
+          <button onclick="realizarLogout()" class="btn-ghost px-3 py-2 rounded-lg text-xs font-semibold shrink-0" title="Sair do Sistema">
+            <i class="fa-solid fa-power-off text-[var(--red)]"></i> Sair
+          </button>
+          <a href="index.html" class="btn-ghost px-3 py-2 rounded-lg text-xs font-semibold shrink-0 whitespace-nowrap">
+            <i class="fa-solid fa-chart-line mr-1"></i> Painel completo
+          </a>
+        </div>
       </div>
-      <div id="ultimosLancamentos" class="space-y-2">
-        <p class="text-xs text-[var(--muted)] py-2">Carregando...</p>
-      </div>
-    </div>
+      <div class="topbar-accent"></div>
+    </header>
 
-    <p class="text-center text-[11px] text-[var(--muted-2)] mono pb-4">Fiocruz Minas · Dados armazenados em planilha Google Sheets via Apps Script</p>
-  </main>
+    <main class="max-w-2xl mx-auto px-4 py-6 space-y-5">
+
+      <div class="panel p-5">
+        <div class="flex items-center gap-2 mb-4 border-b border-[var(--border-soft)] pb-3">
+          <i class="fa-solid fa-pen-to-square text-[var(--amber)] text-lg"></i>
+          <h4 id="tituloFormulario" class="text-base font-bold text-white font-display">Registrar nova viagem</h4>
+        </div>
+
+        <form id="formViagem" onsubmit="salvarDadosFormulario(event)" class="space-y-4">
+          <input type="hidden" id="formId">
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Data de saída</label>
+              <input type="date" id="formDataSaida" required class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Data de retorno <span class="normal-case text-[var(--muted-2)] font-normal">(opcional)</span></label>
+              <input type="date" id="formDataRetorno" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Motorista</label>
+              <input type="text" id="formMotorista" required placeholder="Ex: MAGNO" class="w-full rounded-lg px-3 py-2 text-sm uppercase">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Veículo</label>
+              <input type="text" id="formVeiculo" required placeholder="Ex: PICAPE" class="w-full rounded-lg px-3 py-2 text-sm uppercase">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Origem</label>
+              <input type="text" id="formOrigem" required placeholder="Ex: Sede" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Destino</label>
+              <input type="text" id="formDestino" required placeholder="Ex: Fiocruz" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Km inicial</label>
+              <input type="number" id="formKmInicial" required placeholder="0" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Km final</label>
+              <input type="number" id="formKmFinal" required placeholder="0" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+          </div>
+
+          <p id="previewKmRodado" class="text-xs text-[var(--muted)] mono -mt-2">Km rodado nesta viagem: <span class="text-white font-semibold">0 km</span></p>
+
+          <div class="grid grid-cols-2 gap-3 p-3 bg-black/15 rounded-xl border border-[var(--border-soft)]">
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--teal)] uppercase tracking-wider mb-1">Folga até 600 (1 Dia)</label>
+              <input type="number" id="formFolga1Dia" min="0" value="0" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--amber)] uppercase tracking-wider mb-1">Folga mais de 600 (2 Dias)</label>
+              <input type="number" id="formFolga2Dias" min="0" value="0" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Observação <span class="normal-case text-[var(--muted-2)] font-normal">(opcional)</span></label>
+            <textarea id="formObservacao" rows="2" placeholder="Ex: Levou equipamento, aguardou no local, etc."
+              class="w-full rounded-lg px-3 py-2 text-sm resize-none"></textarea>
+          </div>
+
+          <div class="grid grid-cols-2 gap-3">
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Grupo</label>
+              <select id="formGrupo" class="w-full rounded-lg px-3 py-2 text-sm">
+                <option value="">Selecione...</option>
+              </select>
+            </div>
+            <div>
+              <label class="block text-[11px] font-semibold text-[var(--muted)] uppercase tracking-wider mb-1">Valor (R$) <span class="normal-case text-[var(--muted-2)] font-normal">(opcional)</span></label>
+              <input type="number" id="formValor" min="0" step="0.01" placeholder="0,00" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+          </div>
+
+          <div class="flex items-end gap-2 -mt-1">
+            <div class="flex-1">
+              <label class="block text-[11px] font-semibold text-[var(--muted-2)] uppercase tracking-wider mb-1">Grupo não está na lista?</label>
+              <input type="text" id="novoGrupoInput" placeholder="Digite o nome do novo grupo" class="w-full rounded-lg px-3 py-2 text-sm">
+            </div>
+            <button type="button" onclick="adicionarNovoGrupo()" class="btn-ghost px-3 py-2 rounded-lg text-xs font-semibold whitespace-nowrap">
+              <i class="fa-solid fa-plus mr-1"></i> Adicionar
+            </button>
+          </div>
+
+          <label class="checkbox-card">
+            <input type="checkbox" id="formManutencao">
+            <span class="text-sm font-medium"><i class="fa-solid fa-screwdriver-wrench text-[var(--red)] mr-1"></i> Houve manutenção nesta viagem</span>
+          </label>
+
+          <div class="pt-2 flex gap-2">
+            <button type="submit" id="btnSalvar" class="btn-primary flex-1 py-2.5 rounded-lg text-sm transition-all cursor-pointer">
+              <i class="fa-solid fa-floppy-disk mr-1"></i> Salvar registro
+            </button>
+            <button type="button" id="btnCancelarEdicao" onclick="limparFormulario()" class="hidden btn-ghost px-3 py-2.5 rounded-lg text-sm cursor-pointer">
+              Cancelar
+            </button>
+          </div>
+        </form>
+      </div>
+
+      <div class="panel p-5">
+        <div class="flex items-center justify-between mb-3">
+          <h4 class="text-sm font-bold text-white font-display"><i class="fa-solid fa-clock-rotate-left text-[var(--amber)] mr-2"></i>Últimos lançamentos</h4>
+          <span id="statusSync" class="text-[11px] text-[var(--muted-2)] mono">—</span>
+        </div>
+        <div id="ultimosLancamentos" class="space-y-2">
+          <p class="text-xs text-[var(--muted)] py-2">Carregando...</p>
+        </div>
+      </div>
+
+      <p class="text-center text-[11px] text-[var(--muted-2)] mono pb-4">Fiocruz Minas · Dados armazenados em planilha Google Sheets via Apps Script</p>
+    </main>
+  </div>
 
 <script>
-  const API_URL = "https://script.google.com/macros/s/AKfycbzsV7Yh-YVLdQR4gA4xeJaYH9kHJ5-l2Wsn2VjUcvFgsh7H_qhQlNjx4c9OWSUldxG3/exec";
+  const API_URL = "https://script.google.com/macros/s/AKfycbxUDOB3q_1UwlIBAsbPJNxHoyoC2xfXA1CmxKtTCcdk1moe_o2MMaZ9vUPrEqY7tprZ/exec";
   let dadosGlobais = { statusMotoristas: [], viagens: [] };
 
   document.addEventListener("DOMContentLoaded", () => {
-    document.getElementById('formData').valueAsDate = new Date();
-    ['formKmInicial', 'formKmFinal'].forEach(id =>
-      document.getElementById(id).addEventListener('input', atualizarPreviewKm)
-    );
-    carregarDados();
+    verificarSessao();
   });
 
+  // ========== CONTROLE DE ACESSO (SESSÃO) ==========
+  function verificarSessao() {
+    const usuarioLogado = localStorage.getItem("fleet_user_nome");
+    if (usuarioLogado) {
+      document.getElementById("telaLogin").classList.add("hidden");
+      document.getElementById("conteudoPrincipal").classList.remove("hidden");
+      document.getElementById("labelNomeOperador").textContent = usuarioLogado;
+      
+      // Inicializar eventos do formulário após login confirmado
+      document.getElementById('formDataSaida').valueAsDate = new Date();
+      ['formKmInicial', 'formKmFinal'].forEach(id =>
+        document.getElementById(id).addEventListener('input', atualizarPreviewKm)
+      );
+      carregarDados();
+    } else {
+      document.getElementById("telaLogin").classList.remove("hidden");
+      document.getElementById("conteudoPrincipal").classList.add("hidden");
+    }
+  }
+
+  async function realizarLogin(event) {
+    event.preventDefault();
+    const btn = document.getElementById("btnLogin");
+    const originalText = btn.innerHTML;
+    
+    btn.disabled = true;
+    btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Verificando...';
+
+    const payload = {
+      acao: "login",
+      usuario: document.getElementById("loginUsuario").value.toLowerCase().trim(),
+      senha: document.getElementById("loginSenha").value.trim()
+    };
+
+    try {
+      const response = await fetch(API_URL, {
+        method: "POST",
+        body: JSON.stringify(payload)
+      });
+      const data = await response.json();
+
+      if (data.sucesso) {
+        localStorage.setItem("fleet_user_nome", data.nome);
+        localStorage.setItem("fleet_user_usuario", data.usuario);
+        if (data.primeiroAcesso) {
+          showToast(`Senha criada com sucesso! Bem-vindo(a), ${data.nome}.`, "success", 6000);
+        } else {
+          showToast(`Bem-vindo, ${data.nome}!`, "success");
+        }
+        document.getElementById("formLogin").reset();
+        verificarSessao();
+      } else {
+        showToast(data.erro || "Falha na autenticação.", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Não foi possível conectar ao servidor de autenticação.", "error");
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = originalText;
+    }
+  }
+
+  function realizarLogout() {
+    localStorage.removeItem("fleet_user_nome");
+    localStorage.removeItem("fleet_user_usuario");
+    verificarSessao();
+  }
+
+  // ========== SISTEMA DE VIAGENS ==========
   function atualizarPreviewKm() {
     const ini = Number(document.getElementById('formKmInicial').value) || 0;
     const fim = Number(document.getElementById('formKmFinal').value) || 0;
@@ -301,6 +433,7 @@
       if (resJson.sucesso) {
         dadosGlobais = resJson;
         renderizarUltimosLancamentos();
+        atualizarDropdownGrupos();
         document.getElementById('statusSync').textContent = "Atualizado às " + new Date().toLocaleTimeString('pt-BR');
 
         const params = new URLSearchParams(window.location.search);
@@ -333,6 +466,7 @@
           <div>
             <span class="font-bold text-[var(--amber)]">${v.motorista}</span>
             <span class="text-[var(--muted)]"> · ${v.origem} → ${v.destino}</span>
+            <span class="text-[10px] text-[var(--muted-2)] block">Responsável: ${v.criadoPor || '—'}${v.grupo ? ' · Grupo: ' + v.grupo : ''}${v.valor ? ' · R$ ' + v.valor.toLocaleString('pt-BR', {minimumFractionDigits:2}) : ''}</span>
           </div>
           <div class="flex items-center gap-2 mono text-[var(--muted)] shrink-0">
             <span>${dataFmt}</span>
@@ -345,12 +479,53 @@
 
   function formatarNumero(n) { return Math.round(n).toLocaleString('pt-BR'); }
 
+  // ========== GRUPOS ==========
+  function atualizarDropdownGrupos() {
+    const select = document.getElementById('formGrupo');
+    const valorAtual = select.value;
+    select.innerHTML = '<option value="">Selecione...</option>';
+    (dadosGlobais.gruposDisponiveis || []).forEach(g => {
+      const opt = document.createElement('option');
+      opt.value = g;
+      opt.textContent = g;
+      select.appendChild(opt);
+    });
+    select.value = valorAtual;
+  }
+
+  async function adicionarNovoGrupo() {
+    const input = document.getElementById('novoGrupoInput');
+    const nome = input.value.trim();
+    if (!nome) { showToast("Digite o nome do grupo antes de adicionar.", "error"); return; }
+
+    try {
+      const response = await fetch(API_URL, {
+        method: 'POST',
+        body: JSON.stringify({ acao: 'adicionarGrupo', nomeGrupo: nome })
+      });
+      const data = await response.json();
+
+      if (data.sucesso) {
+        showToast(`Grupo "${nome}" adicionado.`, "success");
+        input.value = "";
+        await carregarDados();
+        document.getElementById('formGrupo').value = nome;
+      } else {
+        showToast(data.erro || "Não foi possível adicionar o grupo.", "error");
+      }
+    } catch (err) {
+      console.error(err);
+      showToast("Erro de conexão ao adicionar o grupo.", "error");
+    }
+  }
+
   function prepararEdicao(id) {
     const v = dadosGlobais.viagens.find(x => x.id === id);
     if (!v) { showToast("Registro não encontrado para edição.", "error"); return; }
 
     document.getElementById('formId').value = v.id;
-    document.getElementById('formData').value = v.data.substring(0, 10);
+    document.getElementById('formDataSaida').value = v.data.substring(0, 10);
+    document.getElementById('formDataRetorno').value = v.dataRetorno ? v.dataRetorno.substring(0, 10) : "";
     document.getElementById('formMotorista').value = v.motorista;
     document.getElementById('formVeiculo').value = v.veiculo;
     document.getElementById('formOrigem').value = v.origem;
@@ -361,6 +536,8 @@
     document.getElementById('formFolga2Dias').value = Number(v.folga2Dias) || 0;
     document.getElementById('formObservacao').value = v.observacao || "";
     document.getElementById('formManutencao').checked = Number(v.manutencao) > 0;
+    document.getElementById('formGrupo').value = v.grupo || "";
+    document.getElementById('formValor').value = v.valor ? v.valor : "";
     atualizarPreviewKm();
 
     document.getElementById('tituloFormulario').textContent = "Editar viagem selecionada";
@@ -372,7 +549,7 @@
   function limparFormulario() {
     document.getElementById('formId').value = "";
     document.getElementById('formViagem').reset();
-    document.getElementById('formData').valueAsDate = new Date();
+    document.getElementById('formDataSaida').valueAsDate = new Date();
     document.getElementById('formFolga1Dia').value = 0;
     document.getElementById('formFolga2Dias').value = 0;
     atualizarPreviewKm();
@@ -386,7 +563,7 @@
     }
   }
 
-  async function salvarDadosFormulario(event) {
+async function salvarDadosFormulario(event) {
     event.preventDefault();
     const btn = document.getElementById('btnSalvar');
     const originalHtml = btn.innerHTML;
@@ -397,7 +574,8 @@
     const payload = {
       id: id,
       acao: acao,
-      data: document.getElementById('formData').value,
+      dataSaida: document.getElementById('formDataSaida').value,
+      dataRetorno: document.getElementById('formDataRetorno').value,
       motorista: document.getElementById('formMotorista').value.toUpperCase().trim(),
       veiculo: document.getElementById('formVeiculo').value.toUpperCase().trim(),
       origem: document.getElementById('formOrigem').value.trim(),
@@ -407,8 +585,16 @@
       folga1Dia: Number(document.getElementById('formFolga1Dia').value),
       folga2Dias: Number(document.getElementById('formFolga2Dias').value),
       observacao: document.getElementById('formObservacao').value.trim(),
-      manutencao: document.getElementById('formManutencao').checked ? 1 : 0
+      manutencao: document.getElementById('formManutencao').checked ? 1 : 0,
+      grupo: document.getElementById('formGrupo').value,
+      valor: Number(document.getElementById('formValor').value) || 0,
+      responsavel: localStorage.getItem("fleet_user_nome") || "Usuário Web"
     };
+
+    if (payload.dataRetorno && payload.dataRetorno < payload.dataSaida) {
+      showToast("A data de retorno não pode ser anterior à data de saída.", "error");
+      return;
+    }
 
     if (payload.kmFinal < payload.kmInicial) {
       showToast("O km final não pode ser menor que o km inicial.", "error");
@@ -419,6 +605,7 @@
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Gravando...';
 
     try {
+      // Ajustamos o modo para 'no-cors' para evitar o erro de requisição cruzada no Cloudflare
       await fetch(API_URL, {
         method: 'POST',
         mode: 'no-cors',
