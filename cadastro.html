@@ -14,14 +14,14 @@
 
 <style>
   :root{
-    --bg:#0d1424;
-    --bg-deep:#090e1a;
-    --surface:#141d38;
-    --surface-2:#1b2748;
-    --border-soft:#212e54;
-    --ink:#eef1fb;
-    --muted:#8f9bc2;
-    --muted-2:#6a76a0;
+    --bg:#225899;
+    --bg-deep:#153966;
+    --surface:#183e6f;
+    --surface-2:#1e4c87;
+    --border-soft:#295c9a;
+    --ink:#ffffff;
+    --muted:#b3cde8;
+    --muted-2:#89aed6;
     --amber:#f2a93b;
     --amber-ink:#3a2a0d;
     --teal:#45c1a8;
@@ -33,8 +33,8 @@
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(1100px 600px at 8% -10%, rgba(242,169,59,.08), transparent 60%),
-      radial-gradient(1000px 700px at 100% 0%, rgba(69,193,168,.07), transparent 55%),
+      radial-gradient(1100px 600px at 8% -10%, rgba(242,169,59,.15), transparent 60%),
+      radial-gradient(1000px 700px at 100% 0%, rgba(69,193,168,.12), transparent 55%),
       var(--bg) !important;
     color:var(--ink);
     font-family:'Work Sans', sans-serif;
@@ -52,7 +52,7 @@
     border-radius:var(--radius);
   }
   .topbar{
-    background:linear-gradient(180deg, #101a34, #0c1428);
+    background:linear-gradient(180deg, #183a66, #122d52);
     border-bottom:1px solid var(--border-soft);
     position:sticky; top:0; z-index:50;
   }
@@ -63,7 +63,7 @@
   }
   .mark{
     width:44px;height:44px;border-radius:12px;
-    background:radial-gradient(circle at 30% 20%, #1c2a52, #0c1428 75%);
+    background:radial-gradient(circle at 30% 20%, #204b82, #122d52 75%);
     border:1px solid var(--border-soft);
     display:flex;align-items:center;justify-content:center;
   }
@@ -85,7 +85,7 @@
   input:focus, select:focus, textarea:focus{
     outline:none;
     border-color:var(--amber);
-    box-shadow:0 0 0 3px rgba(242,169,59,.15);
+    box-shadow:0 0 0 3px rgba(242,169,59,.25);
   }
   .btn-primary{
     background:linear-gradient(180deg, #f6bb5c, var(--amber));
@@ -112,7 +112,7 @@
   }
   .checkbox-card:has(input:checked){
     border-color:var(--red);
-    background:rgba(232,86,79,.12);
+    background:rgba(232,86,79,.15);
   }
   .checkbox-card input{ width:18px; height:18px; accent-color:var(--red); cursor:pointer; }
 
