@@ -138,7 +138,7 @@
 
   <div id="toastWrap"></div>
 
-  <div id="telaLogin" class="flex items-center justify-center min-h-vh p-4 bg-slate-950/20 backdrop-blur-md">
+  <div id="telaLogin" class="flex items-center justify-center min-h-screen p-4">
     <div class="panel p-6 w-full max-w-sm space-y-5">
       <div class="text-center space-y-2">
         <div class="mark mx-auto">
@@ -333,7 +333,6 @@
     verificarSessao();
   });
 
-  // ========== CONTROLE DE ACESSO (SESSÃO) ==========
   function verificarSessao() {
     const usuarioLogado = localStorage.getItem("fleet_user_nome");
     if (usuarioLogado) {
@@ -341,7 +340,6 @@
       document.getElementById("conteudoPrincipal").classList.remove("hidden");
       document.getElementById("labelNomeOperador").textContent = usuarioLogado;
       
-      // Inicializar eventos do formulário após login confirmado
       document.getElementById('formDataSaida').valueAsDate = new Date();
       ['formKmInicial', 'formKmFinal'].forEach(id =>
         document.getElementById(id).addEventListener('input', atualizarPreviewKm)
@@ -402,7 +400,6 @@
     verificarSessao();
   }
 
-  // ========== SISTEMA DE VIAGENS ==========
   function atualizarPreviewKm() {
     const ini = Number(document.getElementById('formKmInicial').value) || 0;
     const fim = Number(document.getElementById('formKmFinal').value) || 0;
@@ -479,7 +476,6 @@
 
   function formatarNumero(n) { return Math.round(n).toLocaleString('pt-BR'); }
 
-  // ========== GRUPOS ==========
   function atualizarDropdownGrupos() {
     const select = document.getElementById('formGrupo');
     const valorAtual = select.value;
@@ -563,7 +559,7 @@
     }
   }
 
-async function salvarDadosFormulario(event) {
+  async function salvarDadosFormulario(event) {
     event.preventDefault();
     const btn = document.getElementById('btnSalvar');
     const originalHtml = btn.innerHTML;
@@ -605,7 +601,6 @@ async function salvarDadosFormulario(event) {
     btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin mr-1"></i> Gravando...';
 
     try {
-      // Ajustamos o modo para 'no-cors' para evitar o erro de requisição cruzada no Cloudflare
       await fetch(API_URL, {
         method: 'POST',
         mode: 'no-cors',
