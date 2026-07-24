@@ -662,7 +662,7 @@
       ? dadosGlobais.statusMotoristas
       : dadosGlobais.statusMotoristas.filter(m => m.motorista === motoristaSelecionado);
 
-    if (!listaFrota.length) {
+ if (!listaFrota.length) {
       frotaWrap.innerHTML = `<p class="text-sm text-[var(--muted)] py-6">Nenhum motorista cadastrado.</p>`;
     } else {
       listaFrota.forEach(m => {
@@ -672,42 +672,52 @@
         const top = destinoTop(m.lugaresVisitados);
         const atingiu = !!mesSelecionado && m.kmAlerta > 0 && kmPeriodo >= m.kmAlerta;
         
-        // Cálculo da diferença em Relação ao Limite
+        // Destaque maior e mais visível para quanto falta ou quanto passou
         let textoStatusLimite = '';
         if (m.kmAlerta > 0) {
           if (kmPeriodo >= m.kmAlerta) {
             const passou = kmPeriodo - m.kmAlerta;
-            textoStatusLimite = `<span class="text-[var(--red)] font-semibold">Passou ${formatarNumero(passou)} km</span>`;
+            textoStatusLimite = `
+              <div class="bg-red-500/10 border border-red-500/30 rounded-lg py-1.5 px-2 text-center text-xs font-bold text-[var(--red)]">
+                <i class="fa-solid fa-circle-exclamation mr-1"></i> Passou ${formatarNumero(passou)} km
+              </div>`;
           } else {
             const falta = m.kmAlerta - kmPeriodo;
-            textoStatusLimite = `<span>Falta <b class="text-white">${formatarNumero(falta)} km</b> para atingir</span>`;
+            textoStatusLimite = `
+              <div class="bg-slate-800/60 border border-[var(--border-soft)] rounded-lg py-1.5 px-2 text-center text-xs font-medium text-[var(--muted)]">
+                Falta <b class="text-white font-bold text-sm ml-0.5">${formatarNumero(falta)} km</b> para atingir
+              </div>`;
           }
         }
 
         frotaWrap.innerHTML += `
-          <div class="panel p-4 w-64 shrink-0 rise ${atingiu ? 'card-limite' : ''}">
-            <div class="flex justify-between items-start mb-2">
+          <div class="panel p-5 w-72 shrink-0 rise ${atingiu ? 'card-limite' : ''}">
+            <div class="flex justify-between items-start mb-3">
               <div>
-                <h5 class="font-bold text-white text-sm">${m.motorista}</h5>
-                <p class="text-[11px] text-[var(--muted)] uppercase tracking-wide">${m.veiculo}</p>
+                <h5 class="font-bold text-white text-base leading-tight">${m.motorista}</h5>
+                <p class="text-[11px] text-[var(--muted)] uppercase tracking-wide font-medium mt-0.5">${m.veiculo}</p>
               </div>
               ${atingiu
-                ? `<i class="fa-solid fa-bolt bolt-alert text-lg" title="Limite atingido"></i>`
-                : `<span class="mono text-xs font-semibold" style="color:${cor}">${Math.round(pct)}%</span>`}
+                ? `<i class="fa-solid fa-bolt bolt-alert text-xl" title="Limite atingido"></i>`
+                : `<span class="mono text-xs font-bold px-2 py-0.5 rounded-md bg-black/30" style="color:${cor}">${Math.round(pct)}%</span>`}
             </div>
-            <div class="gauge-track mb-2">
+
+            <div class="gauge-track mb-2.5">
               <div class="gauge-fill" style="width:${pct}%; background:${cor};"></div>
             </div>
-            <div class="flex justify-between text-[11px] text-[var(--muted)] mono mb-1">
+
+            <div class="flex justify-between text-xs text-[var(--muted)] mono mb-3">
               <span>${formatarNumero(kmPeriodo)} km</span>
               <span>limite ${formatarNumero(m.kmAlerta)} km</span>
             </div>
-            <div class="text-[10px] text-[var(--muted)] mono mb-2 text-right">
+
+            <div class="mb-3">
               ${textoStatusLimite}
             </div>
+
             ${atingiu
-              ? `<span class="chip chip-limite"><i class="fa-solid fa-triangle-exclamation"></i> Limite atingido</span>`
-              : (top ? `<span class="chip"><i class="fa-solid fa-location-dot"></i> ${top}</span>` : '')}
+              ? `<span class="chip chip-limite w-full justify-center py-1"><i class="fa-solid fa-triangle-exclamation"></i> Limite atingido</span>`
+              : (top ? `<span class="chip w-full justify-center py-1 truncate"><i class="fa-solid fa-location-dot"></i> ${top}</span>` : '')}
           </div>
         `;
       });
