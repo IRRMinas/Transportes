@@ -15,15 +15,15 @@
 
 <style>
   :root{
-    --bg:#0d1424;
-    --bg-deep:#090e1a;
-    --surface:#141d38;
-    --surface-2:#1b2748;
-    --border:#2a3860;
-    --border-soft:#212e54;
-    --ink:#eef1fb;
-    --muted:#8f9bc2;
-    --muted-2:#6a76a0;
+    --bg:#225899;
+    --bg-deep:#153966;
+    --surface:#183e6f;
+    --surface-2:#1e4c87;
+    --border:#2f68ad;
+    --border-soft:#295c9a;
+    --ink:#ffffff;
+    --muted:#b3cde8;
+    --muted-2:#89aed6;
     --amber:#f2a93b;
     --amber-ink:#3a2a0d;
     --teal:#45c1a8;
@@ -36,9 +36,9 @@
   html,body{margin:0;padding:0;}
   body{
     background:
-      radial-gradient(1100px 600px at 8% -10%, rgba(242,169,59,.08), transparent 60%),
-      radial-gradient(1000px 700px at 100% 0%, rgba(69,193,168,.07), transparent 55%),
-      var(--bg);
+      radial-gradient(1100px 600px at 8% -10%, rgba(242,169,59,.15), transparent 60%),
+      radial-gradient(1000px 700px at 100% 0%, rgba(69,193,168,.12), transparent 55%),
+      var(--bg) !important;
     color:var(--ink);
     font-family:'Work Sans', sans-serif;
     min-height:100vh;
@@ -58,7 +58,7 @@
   }
 
   .topbar{
-    background:linear-gradient(180deg, #101a34, #0c1428);
+    background:linear-gradient(180deg, #183a66, #122d52);
     border-bottom:1px solid var(--border-soft);
     position:sticky; top:0; z-index:50;
   }
@@ -70,14 +70,14 @@
 
   .mark{
     width:44px;height:44px;border-radius:12px;
-    background:radial-gradient(circle at 30% 20%, #1c2a52, #0c1428 75%);
+    background:radial-gradient(circle at 30% 20%, #204b82, #122d52 75%);
     border:1px solid var(--border-soft);
     display:flex;align-items:center;justify-content:center;
   }
 
   .alert-sign{
-    background:repeating-linear-gradient(135deg, rgba(232,86,79,.15) 0 12px, rgba(232,86,79,.05) 12px 24px), #1c1424;
-    border:1px solid rgba(232,86,79,.4);
+    background:repeating-linear-gradient(135deg, rgba(232,86,79,.2) 0 12px, rgba(232,86,79,.08) 12px 24px), #2b1723;
+    border:1px solid rgba(232,86,79,.5);
     border-radius:12px;
   }
   @keyframes blinker{ 50%{opacity:.35;} }
@@ -85,8 +85,8 @@
 
   .cluster{
     background:
-      linear-gradient(180deg, #172a52, transparent),
-      linear-gradient(180deg, #16204a, #0d1530);
+      linear-gradient(180deg, #1f4a82, transparent),
+      linear-gradient(180deg, #183e6f, #122f57);
     border:1px solid var(--border-soft);
     border-radius:20px;
     position:relative;
@@ -95,7 +95,7 @@
   .cluster::before{
     content:"";
     position:absolute; inset:0;
-    background:linear-gradient(180deg, rgba(255,255,255,.04), transparent 30%);
+    background:linear-gradient(180deg, rgba(255,255,255,.06), transparent 30%);
     pointer-events:none;
   }
   .cluster-cell{
@@ -103,10 +103,10 @@
   }
   .cluster-cell:last-child{border-right:none;}
   .display{
-    background:#060a16;
-    border:1px solid #1c2748;
+    background:#0f2747;
+    border:1px solid #235491;
     border-radius:10px;
-    box-shadow:inset 0 2px 10px rgba(0,0,0,.6);
+    box-shadow:inset 0 2px 10px rgba(0,0,0,.4);
     padding:.65rem .85rem;
   }
   .display .digits{
@@ -120,7 +120,7 @@
 
   .gauge-track{
     height:8px;border-radius:99px;
-    background:#0d1530;
+    background:#102b4e;
     border:1px solid var(--border-soft);
     overflow:hidden;
   }
@@ -130,10 +130,10 @@
   }
 
   .card-limite{
-    border-color:rgba(232,86,79,.55) !important;
+    border-color:rgba(232,86,79,.75) !important;
     background:
-      repeating-linear-gradient(135deg, rgba(232,86,79,.16) 0 12px, rgba(232,86,79,.05) 12px 24px),
-      linear-gradient(180deg, #201323, #150c14);
+      repeating-linear-gradient(135deg, rgba(232,86,79,.2) 0 12px, rgba(232,86,79,.08) 12px 24px),
+      linear-gradient(180deg, #381a28, #240f1a);
     animation:pulseRed 1.8s ease-in-out infinite;
   }
   @keyframes pulseRed{
@@ -146,9 +146,9 @@
     filter:drop-shadow(0 0 6px rgba(232,86,79,.7));
   }
   .chip-limite{
-    background:rgba(232,86,79,.15);
-    border-color:rgba(232,86,79,.5);
-    color:var(--red);
+    background:rgba(232,86,79,.25);
+    border-color:rgba(232,86,79,.6);
+    color:#ff8a85;
   }
 
   .chip{
@@ -170,7 +170,7 @@
   input:focus, select:focus{
     outline:none;
     border-color:var(--amber);
-    box-shadow:0 0 0 3px rgba(242,169,59,.15);
+    box-shadow:0 0 0 3px rgba(242,169,59,.25);
   }
 
   .btn-primary{
@@ -194,7 +194,7 @@
     letter-spacing:.06em;
   }
   tbody tr{border-bottom:1px solid var(--border-soft);}
-  tbody tr:hover{background:rgba(255,255,255,.02);}
+  tbody tr:hover{background:rgba(255,255,255,.05);}
 
   .scrollbar-thin::-webkit-scrollbar{height:6px;width:6px;}
   .scrollbar-thin::-webkit-scrollbar-thumb{background:var(--border-soft);border-radius:99px;}
@@ -217,14 +217,13 @@
   .rise{animation:riseIn .5s ease-out both;}
 
   .skeleton{
-    background:linear-gradient(90deg, var(--surface-2) 25%, #24305a 37%, var(--surface-2) 63%);
+    background:linear-gradient(90deg, var(--surface-2) 25%, #2a5d9e 37%, var(--surface-2) 63%);
     background-size:400% 100%;
     animation:shimmer 1.4s ease infinite;
     border-radius:8px;
   }
   @keyframes shimmer{0%{background-position:100% 0;}100%{background-position:0 0;}}
 
-  /* Estilização da seção recolhível */
   details summary::-webkit-details-marker { display:none; }
   details summary { list-style: none; }
 </style>
@@ -340,14 +339,13 @@
 
       <div class="panel p-5">
         <h4 class="text-base font-bold text-white mb-4 font-display"><i class="fa-solid fa-gauge-high text-[var(--amber)] mr-2"></i>Status da frota — km até a manutenção</h4>
-        <div id="frotaStatusWrap" class="flex gap-3 overflow-x-auto scrollbar-thin pb-2">
-          <div class="skeleton h-24 w-64 shrink-0"></div>
-          <div class="skeleton h-24 w-64 shrink-0"></div>
-          <div class="skeleton h-24 w-64 shrink-0"></div>
+        <div id="frotaStatusWrap" class="flex gap-4 overflow-x-auto scrollbar-thin pb-2">
+          <div class="skeleton h-28 w-80 shrink-0"></div>
+          <div class="skeleton h-28 w-80 shrink-0"></div>
+          <div class="skeleton h-28 w-80 shrink-0"></div>
         </div>
       </div>
 
-      <!-- PAINEL FOLGAS E MANUTENÇÃO AGORA POSICIONADO ACIMA DOS GASTOS POR GRUPO -->
       <div class="panel p-5">
         <h4 class="text-base font-bold text-white mb-4 font-display"><i class="fa-solid fa-umbrella-beach text-[var(--amber)] mr-2"></i>Folgas & manutenção</h4>
 
@@ -388,7 +386,6 @@
         </div>
       </div>
 
-      <!-- SEÇÃO GASTOS POR GRUPO RECOLHÍVEL -->
       <details class="panel p-5 group">
         <summary class="flex items-center justify-between cursor-pointer select-none">
           <div class="flex items-center gap-2">
@@ -662,7 +659,7 @@
       ? dadosGlobais.statusMotoristas
       : dadosGlobais.statusMotoristas.filter(m => m.motorista === motoristaSelecionado);
 
- if (!listaFrota.length) {
+    if (!listaFrota.length) {
       frotaWrap.innerHTML = `<p class="text-sm text-[var(--muted)] py-6">Nenhum motorista cadastrado.</p>`;
     } else {
       listaFrota.forEach(m => {
@@ -672,41 +669,40 @@
         const top = destinoTop(m.lugaresVisitados);
         const atingiu = !!mesSelecionado && m.kmAlerta > 0 && kmPeriodo >= m.kmAlerta;
         
-        // Destaque maior e mais visível para quanto falta ou quanto passou
         let textoStatusLimite = '';
         if (m.kmAlerta > 0) {
           if (kmPeriodo >= m.kmAlerta) {
             const passou = kmPeriodo - m.kmAlerta;
             textoStatusLimite = `
-              <div class="bg-red-500/10 border border-red-500/30 rounded-lg py-1.5 px-2 text-center text-xs font-bold text-[var(--red)]">
-                <i class="fa-solid fa-circle-exclamation mr-1"></i> Passou ${formatarNumero(passou)} km
+              <div class="bg-red-500/20 border border-red-500/40 rounded-lg py-2 px-3 text-center text-xs font-bold text-red-200">
+                <i class="fa-solid fa-circle-exclamation mr-1 text-[var(--red)]"></i> Passou <span class="text-white text-sm font-extrabold">${formatarNumero(passou)} km</span>
               </div>`;
           } else {
             const falta = m.kmAlerta - kmPeriodo;
             textoStatusLimite = `
-              <div class="bg-slate-800/60 border border-[var(--border-soft)] rounded-lg py-1.5 px-2 text-center text-xs font-medium text-[var(--muted)]">
+              <div class="bg-black/25 border border-[var(--border-soft)] rounded-lg py-2 px-3 text-center text-xs font-medium text-[var(--muted)]">
                 Falta <b class="text-white font-bold text-sm ml-0.5">${formatarNumero(falta)} km</b> para atingir
               </div>`;
           }
         }
 
         frotaWrap.innerHTML += `
-          <div class="panel p-5 w-72 shrink-0 rise ${atingiu ? 'card-limite' : ''}">
+          <div class="panel p-5 w-80 shrink-0 rise ${atingiu ? 'card-limite' : ''}">
             <div class="flex justify-between items-start mb-3">
               <div>
                 <h5 class="font-bold text-white text-base leading-tight">${m.motorista}</h5>
-                <p class="text-[11px] text-[var(--muted)] uppercase tracking-wide font-medium mt-0.5">${m.veiculo}</p>
+                <p class="text-xs text-[var(--muted)] uppercase tracking-wide font-semibold mt-0.5">${m.veiculo}</p>
               </div>
               ${atingiu
                 ? `<i class="fa-solid fa-bolt bolt-alert text-xl" title="Limite atingido"></i>`
                 : `<span class="mono text-xs font-bold px-2 py-0.5 rounded-md bg-black/30" style="color:${cor}">${Math.round(pct)}%</span>`}
             </div>
 
-            <div class="gauge-track mb-2.5">
+            <div class="gauge-track mb-3">
               <div class="gauge-fill" style="width:${pct}%; background:${cor};"></div>
             </div>
 
-            <div class="flex justify-between text-xs text-[var(--muted)] mono mb-3">
+            <div class="flex justify-between text-xs text-[var(--muted)] mono mb-3 font-medium">
               <span>${formatarNumero(kmPeriodo)} km</span>
               <span>limite ${formatarNumero(m.kmAlerta)} km</span>
             </div>
@@ -716,8 +712,8 @@
             </div>
 
             ${atingiu
-              ? `<span class="chip chip-limite w-full justify-center py-1"><i class="fa-solid fa-triangle-exclamation"></i> Limite atingido</span>`
-              : (top ? `<span class="chip w-full justify-center py-1 truncate"><i class="fa-solid fa-location-dot"></i> ${top}</span>` : '')}
+              ? `<span class="chip chip-limite w-full justify-center py-1.5"><i class="fa-solid fa-triangle-exclamation"></i> Limite atingido</span>`
+              : (top ? `<span class="chip w-full justify-center py-1.5 truncate"><i class="fa-solid fa-location-dot"></i> ${top}</span>` : '')}
           </div>
         `;
       });
@@ -866,12 +862,12 @@
       chart: { type: 'area', height: 260, toolbar: { show: false }, background: 'transparent', fontFamily: 'IBM Plex Mono, monospace' },
       theme: { mode: 'dark' },
       stroke: { curve: 'smooth', colors: ['#f2a93b'], width: 3 },
-      fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, gradientToColors: ['#0d1424'] } },
+      fill: { type: 'gradient', gradient: { shadeIntensity: 1, opacityFrom: 0.35, opacityTo: 0.05, gradientToColors: ['#153966'] } },
       colors: ['#f2a93b'],
       series: [{ name: 'Km rodados', data: valoresLinha }],
-      xaxis: { categories: categoriasLinha, axisBorder: { show: false }, labels: { style: { colors: '#8f9bc2' } } },
-      yaxis: { labels: { style: { colors: '#8f9bc2' } } },
-      grid: { borderColor: '#2a3860', strokeDashArray: 4 },
+      xaxis: { categories: categoriasLinha, axisBorder: { show: false }, labels: { style: { colors: '#b3cde8' } } },
+      yaxis: { labels: { style: { colors: '#b3cde8' } } },
+      grid: { borderColor: '#295c9a', strokeDashArray: 4 },
       dataLabels: { enabled: false },
       tooltip: { theme: 'dark' }
     };
@@ -898,9 +894,9 @@
       plotOptions: { bar: { borderRadius: 5, horizontal: true, barHeight: '55%' } },
       colors: ['#45c1a8'],
       series: [{ name: 'Visitas', data: valoresDestino }],
-      xaxis: { categories: categoriasDestino, labels: { style: { colors: '#8f9bc2' } } },
-      yaxis: { labels: { style: { colors: '#8f9bc2' } } },
-      grid: { borderColor: '#2a3860', strokeDashArray: 4 },
+      xaxis: { categories: categoriasDestino, labels: { style: { colors: '#b3cde8' } } },
+      yaxis: { labels: { style: { colors: '#b3cde8' } } },
+      grid: { borderColor: '#295c9a', strokeDashArray: 4 },
       tooltip: { theme: 'dark' }
     };
 
