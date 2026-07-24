@@ -223,6 +223,10 @@
     border-radius:8px;
   }
   @keyframes shimmer{0%{background-position:100% 0;}100%{background-position:0 0;}}
+
+  /* Estilização da seção recolhível */
+  details summary::-webkit-details-marker { display:none; }
+  details summary { list-style: none; }
 </style>
 </head>
 
@@ -343,16 +347,7 @@
         </div>
       </div>
 
-      <div class="panel p-5">
-        <div class="flex items-center justify-between mb-4 flex-wrap gap-2">
-          <h4 class="text-base font-bold text-white font-display"><i class="fa-solid fa-people-group text-[var(--amber)] mr-2"></i>Gastos por grupo</h4>
-          <span id="grupoLiderChip" class="chip"><i class="fa-solid fa-trophy mr-1"></i> —</span>
-        </div>
-        <div id="rankingGrupos" class="space-y-3">
-          <p class="text-sm text-[var(--muted)] py-2">Sem dados de grupo para o período selecionado.</p>
-        </div>
-      </div>
-
+      <!-- PAINEL FOLGAS E MANUTENÇÃO AGORA POSICIONADO ACIMA DOS GASTOS POR GRUPO -->
       <div class="panel p-5">
         <h4 class="text-base font-bold text-white mb-4 font-display"><i class="fa-solid fa-umbrella-beach text-[var(--amber)] mr-2"></i>Folgas & manutenção</h4>
 
@@ -393,6 +388,24 @@
         </div>
       </div>
 
+      <!-- SEÇÃO GASTOS POR GRUPO RECOLHÍVEL -->
+      <details class="panel p-5 group">
+        <summary class="flex items-center justify-between cursor-pointer select-none">
+          <div class="flex items-center gap-2">
+            <h4 class="text-base font-bold text-white font-display"><i class="fa-solid fa-people-group text-[var(--amber)] mr-2"></i>Gastos por grupo</h4>
+            <span id="grupoLiderChip" class="chip"><i class="fa-solid fa-trophy mr-1"></i> —</span>
+          </div>
+          <div class="text-xs font-semibold text-[var(--muted)] group-open:text-[var(--amber)] flex items-center gap-2">
+            <span>Clique para expandir/recolher</span>
+            <i class="fa-solid fa-chevron-down transition-transform duration-200 group-open:rotate-180"></i>
+          </div>
+        </summary>
+
+        <div id="rankingGrupos" class="space-y-3 mt-4 pt-4 border-t border-[var(--border-soft)]">
+          <p class="text-sm text-[var(--muted)] py-2">Sem dados de grupo para o período selecionado.</p>
+        </div>
+      </details>
+
       <div class="panel overflow-hidden">
           <div class="p-5 border-b border-[var(--border-soft)] flex justify-between items-center">
             <h4 class="text-base font-bold text-white font-display"><i class="fa-solid fa-list-check text-[var(--amber)] mr-2"></i>Histórico completo</h4>
@@ -432,14 +445,12 @@
   let chartDestinosObj = null;
 
   document.addEventListener("DOMContentLoaded", () => {
-    // PROTEÇÃO DE TELA: Se não houver login, joga o usuário para o formulário/login
     const nomeLogado = localStorage.getItem("fleet_user_nome");
     if (!nomeLogado) {
       window.location.href = "cadastro.html";
       return;
     }
 
-    // Se estiver logado, exibe a tela e carrega as informações
     document.getElementById("conteudoDashboard").classList.remove("hidden");
     document.getElementById("labelNomeOperador").textContent = nomeLogado;
     const hoje = new Date();
@@ -454,7 +465,6 @@
     window.location.href = "cadastro.html";
   }
 
-  // ---------- Toasts ----------
   function showToast(msg, type = "info", ms = 4200) {
     const wrap = document.getElementById('toastWrap');
     const icons = { success: 'fa-circle-check', error: 'fa-triangle-exclamation', info: 'fa-circle-info' };
@@ -485,7 +495,6 @@
     requestAnimationFrame(passo);
   }
 
-  // ---------- Carregamento ----------
   async function carregarDados(tentativaInterna = false) {
     const btnIcon = document.getElementById('btnRecarregarIcon');
     if(btnIcon) btnIcon.classList.add('fa-spin');
@@ -662,6 +671,19 @@
         const cor = pct >= 100 ? 'var(--red)' : (pct >= 75 ? 'var(--amber)' : 'var(--teal)');
         const top = destinoTop(m.lugaresVisitados);
         const atingiu = !!mesSelecionado && m.kmAlerta > 0 && kmPeriodo >= m.kmAlerta;
+        
+        // Cálculo da diferença em Relação ao Limite
+        let textoStatusLimite = '';
+        if (m.kmAlerta > 0) {
+          if (kmPeriodo >= m.kmAlerta) {
+            const passou = kmPeriodo - m.kmAlerta;
+            textoStatusLimite = `<span class="text-[var(--red)] font-semibold">Passou ${formatarNumero(passou)} km</span>`;
+          } else {
+            const falta = m.kmAlerta - kmPeriodo;
+            textoStatusLimite = `<span>Falta <b class="text-white">${formatarNumero(falta)} km</b> para atingir</span>`;
+          }
+        }
+
         frotaWrap.innerHTML += `
           <div class="panel p-4 w-64 shrink-0 rise ${atingiu ? 'card-limite' : ''}">
             <div class="flex justify-between items-start mb-2">
@@ -676,9 +698,12 @@
             <div class="gauge-track mb-2">
               <div class="gauge-fill" style="width:${pct}%; background:${cor};"></div>
             </div>
-            <div class="flex justify-between text-[11px] text-[var(--muted)] mono mb-2">
+            <div class="flex justify-between text-[11px] text-[var(--muted)] mono mb-1">
               <span>${formatarNumero(kmPeriodo)} km</span>
               <span>limite ${formatarNumero(m.kmAlerta)} km</span>
+            </div>
+            <div class="text-[10px] text-[var(--muted)] mono mb-2 text-right">
+              ${textoStatusLimite}
             </div>
             ${atingiu
               ? `<span class="chip chip-limite"><i class="fa-solid fa-triangle-exclamation"></i> Limite atingido</span>`
